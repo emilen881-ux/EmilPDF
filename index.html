@@ -291,7 +291,7 @@
         }
         
         .thumbnails-container.visible {
-            max-height: 200px;
+            max-height: 220px;
             opacity: 1;
         }
         
@@ -310,22 +310,24 @@
         
         .thumbnail-canvas {
             display: block;
-            height: 140px;
+            height: 160px;
             width: auto;
             border: 3px solid rgba(255,255,255,0.3);
             border-radius: 8px;
             background: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             transition: all 0.3s;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
         
         @media (min-width: 768px) {
             .thumbnail-canvas {
-                height: 160px;
+                height: 180px;
             }
             
             .thumbnails-container.visible {
-                max-height: 220px;
+                max-height: 240px;
             }
         }
         
@@ -463,6 +465,8 @@
             height: auto;
             border: 4px solid transparent;
             transition: all 0.3s;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
         
         .page-selector-item.selected .page-selector-canvas {
@@ -576,7 +580,7 @@
             color: rgba(255,255,255,0.5);
         }
         
-        /* Основная область - ВСЕГДА СКРОЛЛИТСЯ */
+        /* ПРАВИЛЬНАЯ ОБЛАСТЬ СКРОЛЛА */
         .main-area {
             flex: 1;
             display: flex;
@@ -616,12 +620,10 @@
             background-clip: padding-box;
         }
         
+        /* КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Контейнер адаптируется под зум */
         .canvas-container {
-            min-height: 100%;
-            min-width: 100%;
             display: inline-block;
             padding: 40px;
-            position: relative;
             transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         
@@ -636,8 +638,6 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.4);
             border-radius: 4px;
             overflow: visible;
-            transform-origin: center center;
-            transition: transform 0.2s ease-out;
         }
         
         #pdfCanvas {
@@ -998,6 +998,12 @@
             box-shadow: 0 3px 12px rgba(102, 126, 234, 0.3);
         }
 
+        .modal-btn-print {
+            background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+            color: white;
+            box-shadow: 0 3px 12px rgba(52, 199, 89, 0.3);
+        }
+
         .overlap-info {
             font-size: 10px;
             color: #667eea;
@@ -1079,8 +1085,8 @@
     <!-- Модальное окно -->
     <div class="modal" id="formatModal">
         <div class="modal-content">
-            <div class="modal-header">Выберите формат печати</div>
-            <div class="modal-description">Большой лист будет разделён на листы выбранного формата с перекрытием для склейки</div>
+            <div class="modal-header">Печать большого формата</div>
+            <div class="modal-description">Текущий лист будет разделён на листы A4 с перекрытием для склейки</div>
             
             <div class="overlap-info">
                 <strong>Перекрытие:</strong> <span id="overlapDisplay">10</span> мм для удобной склейки
@@ -1115,7 +1121,8 @@
             
             <div class="modal-actions">
                 <button class="modal-btn modal-btn-cancel" onclick="closeFormatModal()">Отмена</button>
-                <button class="modal-btn modal-btn-confirm" onclick="confirmTiling()">Разделить</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmTiling()">📥 Скачать PDF</button>
+                <button class="modal-btn modal-btn-print" onclick="confirmPrinting()">🖨️ Печать</button>
             </div>
         </div>
     </div>
@@ -1124,7 +1131,6 @@
         <!-- ЕДИНАЯ ВЕРХНЯЯ ПАНЕЛЬ -->
         <div class="top-toolbar">
             <div class="left-section">
-                <!-- КРАСИВЫЙ ЛОГОТИП -->
                 <div class="logo-section">
                     <div class="logo-icon">📄</div>
                     <div class="logo-text">
@@ -1133,7 +1139,6 @@
                     </div>
                 </div>
                 
-                <!-- НАВИГАЦИЯ ПО СТРАНИЦАМ -->
                 <div class="page-nav-section">
                     <button class="page-nav-btn" onclick="prevPage()">◀</button>
                     <span class="page-info">
@@ -1145,7 +1150,7 @@
             </div>
             
             <div class="right-section">
-                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                <button class="upload-btn" id="uploadBtn">
                     📂 Загрузить PDF
                 </button>
                 <input type="file" id="fileInput" accept="application/pdf">
@@ -1177,9 +1182,11 @@
                 <label>Перекрытие (мм):</label>
                 <input type="number" id="overlap" value="10" min="0" max="30" onchange="updateOverlapDisplay()">
             </div>
+            
+            <button class="tool-btn danger" onclick="clearCache()">🗑️ Очистить кэш</button>
         </div>
         
-        <!-- Основная область - ВСЕГДА СКРОЛЛИТСЯ -->
+        <!-- Основная область -->
         <div class="main-area">
             <div class="canvas-area" id="canvasArea">
                 <div class="empty-state" id="emptyState">
@@ -1223,23 +1230,12 @@
         
         function detectGPUSupport() {
             const testCanvas = document.createElement('canvas');
-            const gl = testCanvas.getContext('webgl2', {
-                alpha: false,
-                antialias: false,
-                powerPreference: 'high-performance',
-                desynchronized: true
-            }) || testCanvas.getContext('webgl', {
-                alpha: false,
-                antialias: false,
-                powerPreference: 'high-performance',
-                desynchronized: true
-            });
+            const gl = testCanvas.getContext('webgl2') || testCanvas.getContext('webgl');
             
             if (gl) {
                 const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
                 if (debugInfo) {
                     const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-                    console.log('GPU:', renderer);
                     isHighPerformance = /Apple|iPad|Metal/i.test(renderer);
                 }
                 useWebGL = true;
@@ -1255,8 +1251,12 @@
         let pageNum = 1;
         let pageRendering = false;
         let pageNumPending = null;
-        let displayScale = 1.5;
-        let highResScale = 3.0;
+        
+        let displayScale = 2.0;
+        let highResScale = 4.0;
+        let thumbnailScale = 1.2;
+        let selectorScale = 0.8;
+        
         let canvas = document.getElementById('pdfCanvas');
         let ctx = canvas.getContext('2d', { 
             alpha: false,
@@ -1298,12 +1298,10 @@
         
         let thumbnailHideTimeout = null;
         
-        // PINCH ZOOM + WHEEL ZOOM
-        let currentScale = 1.0;
-        let minScale = 0.5;
-        let maxScale = 4.0;
+        let currentZoom = 1.0;
+        let minZoom = 0.5;
+        let maxZoom = 4.0;
         
-        // СВАЙП
         let swipeStartX = 0;
         let swipeStartY = 0;
         let swipeDelta = 0;
@@ -1328,6 +1326,7 @@
         };
         
         const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
         const progressBar = document.getElementById('progressBar');
         const thumbnailsContainer = document.getElementById('thumbnailsContainer');
         const thumbnailsWrapper = document.getElementById('thumbnailsWrapper');
@@ -1348,59 +1347,119 @@
             }
         });
         
-        // HAMMER.JS - PINCH ZOOM для iPad
+        uploadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            fileInput.value = '';
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.type !== 'application/pdf') {
+                    showStatus('❌ Это не PDF файл!');
+                    return;
+                }
+                loadPDF(file);
+            }
+        });
+        
+        function clearCache() {
+            if (confirm('Очистить кэш и удалить сохранённый PDF?')) {
+                indexedDB.deleteDatabase('EmilPDFDB');
+                localStorage.removeItem('emilPdfState');
+                location.reload();
+            }
+        }
+        
         const hammer = new Hammer(canvasWrapper);
         hammer.get('pinch').set({ enable: true });
-        hammer.get('pan').set({ enable: false }); // Отключаем pan, оставляем браузерный скролл
+        hammer.get('pan').set({ enable: false });
         
-        let lastScale = 1;
+        let lastZoom = 1;
         
         hammer.on('pinchstart', (e) => {
-            lastScale = currentScale;
+            lastZoom = currentZoom;
         });
         
         hammer.on('pinchmove', (e) => {
-            let newScale = lastScale * e.scale;
-            newScale = Math.max(minScale, Math.min(maxScale, newScale));
+            let newZoom = lastZoom * e.scale;
+            newZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
             
-            currentScale = newScale;
-            canvasWrapper.style.transform = `scale(${currentScale})`;
+            currentZoom = newZoom;
+            applyZoom();
             updateZoomDisplay();
         });
         
         hammer.on('pinchend', (e) => {
-            lastScale = currentScale;
+            lastZoom = currentZoom;
         });
         
-        // WHEEL ZOOM для Mac/тачпада
-        canvasWrapper.addEventListener('wheel', (e) => {
+        // ИСПРАВЛЕНО: Быстрый зум БЕЗ МИГАНИЯ
+        let zoomTimeout = null;
+        let pendingZoom = null;
+        
+        canvasArea.addEventListener('wheel', (e) => {
             if (e.ctrlKey || e.metaKey) {
                 e.preventDefault();
                 
                 const delta = -e.deltaY;
-                const zoomIntensity = 0.001;
-                const newScale = currentScale + delta * zoomIntensity;
+                const zoomIntensity = 0.003;
+                let newZoom = currentZoom + delta * zoomIntensity;
                 
-                currentScale = Math.max(minScale, Math.min(maxScale, newScale));
-                canvasWrapper.style.transform = `scale(${currentScale})`;
-                updateZoomDisplay();
+                newZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+                
+                if (Math.abs(newZoom - currentZoom) > 0.01) {
+                    currentZoom = newZoom;
+                    pendingZoom = newZoom;
+                    
+                    updateZoomDisplay();
+                    
+                    // Debounce для плавности
+                    clearTimeout(zoomTimeout);
+                    zoomTimeout = setTimeout(() => {
+                        if (pendingZoom !== null) {
+                            applyZoom();
+                            pendingZoom = null;
+                        }
+                    }, 50);
+                }
             }
         }, { passive: false });
         
+        function applyZoom() {
+            if (!currentPage) return;
+            
+            const baseScale = displayScale * currentZoom;
+            const viewport = currentPage.getViewport({scale: baseScale});
+            
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            
+            currentPage.render({
+                canvasContext: ctx,
+                viewport: viewport
+            });
+            
+            resetSelection();
+        }
+        
         function updateZoomDisplay() {
-            const percent = Math.round(currentScale * 100);
+            const percent = Math.round(currentZoom * 100);
             zoomIndicator.textContent = percent + '%';
             zoomIndicator.classList.add('visible');
             
-            setTimeout(() => {
+            clearTimeout(window.zoomDisplayTimeout);
+            window.zoomDisplayTimeout = setTimeout(() => {
                 zoomIndicator.classList.remove('visible');
             }, 1500);
         }
         
         function resetZoom() {
-            currentScale = 1.0;
-            lastScale = 1.0;
-            canvasWrapper.style.transform = 'scale(1)';
+            currentZoom = 1.0;
+            lastZoom = 1.0;
+            pendingZoom = null;
         }
         
         function toggleExtraTools() {
@@ -1425,8 +1484,10 @@
         async function generateThumbnails() {
             thumbnailsWrapper.innerHTML = '';
             
-            const thumbHeight = window.innerWidth >= 768 ? 160 : 140;
-            const scale = thumbHeight / (await pdfDoc.getPage(1)).getViewport({scale: 1}).height;
+            const firstPage = await pdfDoc.getPage(1);
+            const baseViewport = firstPage.getViewport({scale: 1});
+            const thumbHeight = window.innerWidth >= 768 ? 180 : 160;
+            const scale = (thumbHeight / baseViewport.height) * thumbnailScale;
             
             for (let i = 1; i <= pdfDoc.numPages; i++) {
                 const page = await pdfDoc.getPage(i);
@@ -1437,7 +1498,11 @@
                 thumbCanvas.width = viewport.width;
                 thumbCanvas.height = viewport.height;
                 
-                const thumbCtx = thumbCanvas.getContext('2d');
+                const thumbCtx = thumbCanvas.getContext('2d', {
+                    alpha: false,
+                    desynchronized: true
+                });
+                
                 await page.render({
                     canvasContext: thumbCtx,
                     viewport: viewport
@@ -1508,14 +1573,17 @@
         
         async function renderSelectorThumbnail(i) {
             const page = await pdfDoc.getPage(i);
-            const viewport = page.getViewport({scale: 0.5});
+            const viewport = page.getViewport({scale: selectorScale});
             
             const selectorCanvas = document.createElement('canvas');
             selectorCanvas.className = 'page-selector-canvas';
             selectorCanvas.width = viewport.width;
             selectorCanvas.height = viewport.height;
             
-            const selectorCtx = selectorCanvas.getContext('2d');
+            const selectorCtx = selectorCanvas.getContext('2d', {
+                alpha: false
+            });
+            
             await page.render({
                 canvasContext: selectorCtx,
                 viewport: viewport
@@ -1561,6 +1629,7 @@
             }, 300);
         }
         
+        // ИСПРАВЛЕНО: Правильное извлечение без ошибки буфера
         async function extractSelectedPages() {
             if (selectedPages.size === 0) {
                 showStatus('Выберите хотя бы одну страницу');
@@ -1569,15 +1638,16 @@
             
             if (!pdfArrayBuffer) {
                 showStatus('❌ PDF не загружен в память');
-                console.error('pdfArrayBuffer is null');
                 return;
             }
             
             try {
-                console.log('Начало извлечения страниц:', Array.from(selectedPages));
+                showStatus('Извлечение...');
                 const pageIndices = Array.from(selectedPages).sort((a, b) => a - b).map(p => p - 1);
                 
-                const srcDoc = await PDFLib.PDFDocument.load(pdfArrayBuffer);
+                // ИСПРАВЛЕНО: Создаём копию буфера
+                const buffer = pdfArrayBuffer.slice(0);
+                const srcDoc = await PDFLib.PDFDocument.load(buffer);
                 const newDoc = await PDFLib.PDFDocument.create();
                 
                 for (const pageIndex of pageIndices) {
@@ -1617,13 +1687,16 @@
             }
             
             try {
+                showStatus('Извлечение...');
                 const pageIndices = parsePageRange(rangeStr, pdfDoc.numPages);
                 if (pageIndices.length === 0) {
                     showStatus('Неверный формат');
                     return;
                 }
                 
-                const srcDoc = await PDFLib.PDFDocument.load(pdfArrayBuffer);
+                // ИСПРАВЛЕНО: Создаём копию буфера
+                const buffer = pdfArrayBuffer.slice(0);
+                const srcDoc = await PDFLib.PDFDocument.load(buffer);
                 const newDoc = await PDFLib.PDFDocument.create();
                 
                 for (const pageIndex of pageIndices) {
@@ -1691,42 +1764,6 @@
             return null;
         }
         
-        function savePDFToIndexedDB(arrayBuffer) {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open('EmilPDFDB', 1);
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    const db = request.result;
-                    const transaction = db.transaction(['pdfs'], 'readwrite');
-                    const store = transaction.objectStore('pdfs');
-                    store.put({ id: 'current', data: arrayBuffer, timestamp: Date.now() });
-                    transaction.oncomplete = () => resolve();
-                    transaction.onerror = () => reject(transaction.error);
-                };
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    if (!db.objectStoreNames.contains('pdfs')) {
-                        db.createObjectStore('pdfs', { keyPath: 'id' });
-                    }
-                };
-            });
-        }
-        
-        function loadPDFFromIndexedDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open('EmilPDFDB', 1);
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    const db = request.result;
-                    const transaction = db.transaction(['pdfs'], 'readonly');
-                    const store = transaction.objectStore('pdfs');
-                    const getRequest = store.get('current');
-                    getRequest.onsuccess = () => resolve(getRequest.result);
-                    getRequest.onerror = () => reject(getRequest.error);
-                };
-            });
-        }
-        
         function getEventCoordinates(e) {
             if (e.touches && e.touches.length > 0) {
                 return {
@@ -1740,23 +1777,12 @@
             };
         }
         
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                loadPDF(file);
-            }
-        });
-        
         async function loadPDF(file) {
             progressBar.classList.add('active');
             
             try {
                 const arrayBuffer = await file.arrayBuffer();
-                
                 pdfArrayBuffer = arrayBuffer;
-                console.log('PDF сохранён в память, размер:', arrayBuffer.byteLength);
-                
-                await savePDFToIndexedDB(arrayBuffer);
                 
                 const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
                 pdfDoc = await loadingTask.promise;
@@ -1767,29 +1793,24 @@
                 document.getElementById('pageCount').textContent = pdfDoc.numPages;
                 document.getElementById('pageNum').max = pdfDoc.numPages;
                 document.getElementById('emptyState').style.display = 'none';
-                document.getElementById('canvasContainer').style.display = 'block';
+                document.getElementById('canvasContainer').style.display = 'inline-block';
                 document.getElementById('dimensionInfo').classList.add('visible');
                 
                 ['cropBtn', 'printBtn', 'resetBtn', 'tileBtn', 'extractBtn', 'fitBtn', 'extractVisualBtn'].forEach(id => {
                     document.getElementById(id).disabled = false;
                 });
                 
-                const savedState = loadState();
-                if (savedState && savedState.pageNum && savedState.pageNum <= pdfDoc.numPages) {
-                    pageNum = savedState.pageNum;
-                    displayScale = savedState.displayScale || displayScale;
-                    highResScale = displayScale * 2;
-                }
+                pageNum = 1;
                 
                 await renderPage(pageNum);
                 await generateThumbnails();
                 fitToWidth();
                 
-                showStatus('✓ PDF загружен' + (hasGPU ? ' с GPU!' : '!'));
+                showStatus('✓ PDF загружен!');
                 
             } catch (error) {
-                console.error('Ошибка загрузки:', error);
-                showStatus('❌ Ошибка загрузки PDF');
+                console.error('❌ Ошибка загрузки:', error);
+                showStatus('❌ Ошибка: ' + error.message);
                 progressBar.classList.remove('active');
             }
         }
@@ -1799,19 +1820,14 @@
             
             currentPage = await pdfDoc.getPage(num);
             
-            const displayViewport = currentPage.getViewport({scale: displayScale});
+            const displayViewport = currentPage.getViewport({scale: displayScale * currentZoom});
             canvas.height = displayViewport.height;
             canvas.width = displayViewport.width;
             
-            const renderContext = {
+            await currentPage.render({
                 canvasContext: ctx,
-                viewport: displayViewport,
-                intent: 'display',
-                enableWebGL: useWebGL,
-                renderInteractiveForms: false
-            };
-            
-            await currentPage.render(renderContext).promise;
+                viewport: displayViewport
+            }).promise;
             
             const highResViewport = currentPage.getViewport({scale: highResScale});
             hiddenCanvas.height = highResViewport.height;
@@ -1882,6 +1898,7 @@
             const viewport = currentPage.getViewport({scale: 1});
             displayScale = containerWidth / viewport.width;
             highResScale = displayScale * 2;
+            currentZoom = 1.0;
             queueRenderPage(pageNum);
         }
         
@@ -1893,7 +1910,6 @@
             document.getElementById('pageDimensions').textContent = `${widthMM} × ${heightMM} мм`;
         }
         
-        // СВАЙП ДЛЯ ПЕРЕКЛЮЧЕНИЯ СТРАНИЦ - 15%
         canvasContainer.addEventListener('touchstart', (e) => {
             if (e.touches.length !== 1 || isDrawing || isMoving || isResizing) return;
             
@@ -1990,8 +2006,8 @@
             
             const coords = getEventCoordinates(e);
             const rect = canvas.getBoundingClientRect();
-            const x = (coords.clientX - rect.left) / currentScale;
-            const y = (coords.clientY - rect.top) / currentScale;
+            const x = (coords.clientX - rect.left);
+            const y = (coords.clientY - rect.top);
             
             if (e.target.classList.contains('selection-handle')) {
                 e.preventDefault();
@@ -2060,8 +2076,8 @@
             e.preventDefault();
             
             const rect = canvas.getBoundingClientRect();
-            const x = (coords.clientX - rect.left) / currentScale;
-            const y = (coords.clientY - rect.top) / currentScale;
+            const x = (coords.clientX - rect.left);
+            const y = (coords.clientY - rect.top);
             
             if (isDrawing) {
                 const width = x - startX;
@@ -2126,8 +2142,9 @@
             selectionOverlay.style.height = selection.height + 'px';
             selectionOverlay.style.display = 'block';
             
-            const widthMM = Math.round(selection.width / displayScale * 25.4 / 72);
-            const heightMM = Math.round(selection.height / displayScale * 25.4 / 72);
+            const actualScale = displayScale * currentZoom;
+            const widthMM = Math.round(selection.width / actualScale * 25.4 / 72);
+            const heightMM = Math.round(selection.height / actualScale * 25.4 / 72);
             selectionInfo.textContent = `${Math.round(selection.width)} × ${Math.round(selection.height)} px (${widthMM} × ${heightMM} мм)`;
         }
         
@@ -2144,7 +2161,8 @@
             }
             
             try {
-                const scaleRatio = highResScale / displayScale;
+                const actualScale = displayScale * currentZoom;
+                const scaleRatio = highResScale / actualScale;
                 const highResSelection = {
                     x: selection.x * scaleRatio,
                     y: selection.y * scaleRatio,
@@ -2164,8 +2182,8 @@
                 tempCtx.putImageData(imageData, 0, 0);
                 
                 const { jsPDF } = window.jspdf;
-                const widthPt = highResSelection.width * 72 / (highResScale * 72);
-                const heightPt = highResSelection.height * 72 / (highResScale * 72);
+                const widthPt = highResSelection.width * 72 / highResScale;
+                const heightPt = highResSelection.height * 72 / highResScale;
                 
                 const pdf = new jsPDF({
                     orientation: highResSelection.width > highResSelection.height ? 'landscape' : 'portrait',
@@ -2190,7 +2208,8 @@
             }
             
             try {
-                const scaleRatio = highResScale / displayScale;
+                const actualScale = displayScale * currentZoom;
+                const scaleRatio = highResScale / actualScale;
                 const highResSelection = {
                     x: selection.x * scaleRatio,
                     y: selection.y * scaleRatio,
@@ -2247,9 +2266,82 @@
             saveState();
         }
         
+        async function confirmPrinting() {
+            closeFormatModal();
+            showStatus('Подготовка к печати...');
+            
+            try {
+                const viewport = currentPage.getViewport({scale: 1});
+                const pageWidthMM = viewport.width * 25.4 / 72;
+                const pageHeightMM = viewport.height * 25.4 / 72;
+                
+                const format = paperFormats[selectedFormat];
+                const overlapMM = parseFloat(document.getElementById('overlap').value);
+                
+                const tileWidth = format.width - overlapMM;
+                const tileHeight = format.height - overlapMM;
+                
+                const cols = Math.ceil(pageWidthMM / tileWidth);
+                const rows = Math.ceil(pageHeightMM / tileHeight);
+                
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: format.width > format.height ? 'landscape' : 'portrait',
+                    unit: 'mm',
+                    format: [format.width, format.height]
+                });
+                
+                let firstPage = true;
+                
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                        if (!firstPage) pdf.addPage();
+                        firstPage = false;
+                        
+                        const xMM = col * tileWidth - (col > 0 ? overlapMM : 0);
+                        const yMM = row * tileHeight - (row > 0 ? overlapMM : 0);
+                        
+                        const x = (xMM / pageWidthMM) * hiddenCanvas.width;
+                        const y = (yMM / pageHeightMM) * hiddenCanvas.height;
+                        const w = Math.min((format.width / pageWidthMM) * hiddenCanvas.width, hiddenCanvas.width - x);
+                        const h = Math.min((format.height / pageHeightMM) * hiddenCanvas.height, hiddenCanvas.height - y);
+                        
+                        const imageData = hiddenCtx.getImageData(x, y, w, h);
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = w;
+                        tempCanvas.height = h;
+                        const tempCtx = tempCanvas.getContext('2d');
+                        tempCtx.putImageData(imageData, 0, 0);
+                        
+                        const imgData = tempCanvas.toDataURL('image/jpeg', 0.95);
+                        pdf.addImage(imgData, 'JPEG', 0, 0, format.width, format.height, undefined, 'FAST');
+                        
+                        pdf.setFontSize(8);
+                        pdf.setTextColor(150);
+                        pdf.text(`Лист ${row + 1}-${col + 1} (${row * cols + col + 1} из ${rows * cols})`, 5, format.height - 5);
+                    }
+                }
+                
+                const pdfBlob = pdf.output('blob');
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                
+                const printWindow = window.open(pdfUrl, '_blank');
+                printWindow.addEventListener('load', () => {
+                    setTimeout(() => {
+                        printWindow.print();
+                    }, 500);
+                });
+                
+                showStatus(`✓ Открыто окно печати: ${rows * cols} листов`);
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showStatus('❌ Ошибка печати');
+            }
+        }
+        
         async function confirmTiling() {
             closeFormatModal();
-            showStatus('Разделение...');
+            showStatus('Создание PDF...');
             
             try {
                 const viewport = currentPage.getViewport({scale: 1});
@@ -2317,45 +2409,6 @@
             toast.style.display = 'block';
             setTimeout(() => toast.style.display = 'none', 3000);
         }
-        
-        window.addEventListener('load', async () => {
-            loadState();
-            try {
-                const savedPDF = await loadPDFFromIndexedDB();
-                if (savedPDF && savedPDF.data) {
-                    pdfArrayBuffer = savedPDF.data;
-                    console.log('PDF восстановлен из IndexedDB, размер:', pdfArrayBuffer.byteLength);
-                    
-                    const loadingTask = pdfjsLib.getDocument({data: savedPDF.data});
-                    pdfDoc = await loadingTask.promise;
-                    
-                    document.getElementById('pageCount').textContent = pdfDoc.numPages;
-                    document.getElementById('pageNum').max = pdfDoc.numPages;
-                    document.getElementById('emptyState').style.display = 'none';
-                    document.getElementById('canvasContainer').style.display = 'block';
-                    document.getElementById('dimensionInfo').classList.add('visible');
-                    
-                    ['cropBtn', 'printBtn', 'resetBtn', 'tileBtn', 'extractBtn', 'fitBtn', 'extractVisualBtn'].forEach(id => {
-                        document.getElementById(id).disabled = false;
-                    });
-                    
-                    const savedState = loadState();
-                    if (savedState && savedState.pageNum && savedState.pageNum <= pdfDoc.numPages) {
-                        pageNum = savedState.pageNum;
-                        displayScale = savedState.displayScale || displayScale;
-                        highResScale = displayScale * 2;
-                    }
-                    
-                    await renderPage(pageNum);
-                    await generateThumbnails();
-                    fitToWidth();
-                    
-                    showStatus('✓ PDF восстановлен');
-                }
-            } catch (error) {
-                console.log('Нет сохраненного PDF');
-            }
-        });
     </script>
 </body>
 </html>
