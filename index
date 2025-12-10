@@ -2,2058 +2,2360 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#667eea">
-    <title>Эмиль Бирки</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Эмиль PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        input, textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #667eea 75%, #764ba2 100%);
-            background-size: 400% 400%;
-            animation: gradientFlow 15s ease infinite;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #1a1a1a;
+            padding: 0;
             min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
         
-        @keyframes gradientFlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: moveBackground 20s linear infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        @keyframes moveBackground {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-        
-        .header {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(30px) saturate(180%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%);
-            padding: 12px 16px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.08);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        .layout {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 0.5px solid rgba(255,255,255,0.3);
+            flex-direction: column;
+            height: 100vh;
         }
         
-        .logo {
+        /* ЕДИНАЯ ВЕРХНЯЯ ПАНЕЛЬ */
+        .top-toolbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+        
+        .left-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        /* КРАСИВЫЙ ЛОГОТИП */
+        .logo-section {
             display: flex;
             align-items: center;
             gap: 10px;
-            animation: fadeInDown 0.6s ease-out;
-        }
-        
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.25);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         
         .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+            font-size: 28px;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
             animation: float 3s ease-in-out infinite;
         }
         
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
+            50% { transform: translateY(-3px); }
         }
         
-        .header h1 {
-            font-size: 20px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            background-size: 200% 200%;
-            animation: gradientShift 3s ease infinite;
-        }
-        
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        
-        .stats {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 700;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        .tabs {
+        .logo-text {
             display: flex;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(30px) saturate(180%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%);
-            position: sticky;
-            top: 60px;
-            z-index: 99;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.08);
-            border-bottom: 0.5px solid rgba(255,255,255,0.3);
+            flex-direction: column;
+            line-height: 1.1;
         }
         
-        .tab {
-            flex: 1;
-            padding: 16px;
-            border: none;
-            background: none;
+        .logo-title {
+            font-size: 18px;
+            font-weight: 900;
+            color: white;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .logo-subtitle {
+            font-size: 9px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .page-nav-section {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 8px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .page-nav-btn {
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.25);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
             font-size: 14px;
-            font-weight: 700;
-            color: #9ca3af;
+            color: white;
             cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
         }
         
-        .tab::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateX(-50%);
+        .page-nav-btn:hover {
+            background: rgba(255,255,255,0.35);
+            transform: scale(1.05);
         }
         
-        .tab.active {
+        .page-info {
+            font-size: 12px;
+            color: white;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            padding: 0 4px;
+        }
+        
+        .page-input {
+            width: 42px;
+            padding: 5px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.25);
+            border-radius: 6px;
+            font-size: 12px;
+            color: white;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+        }
+        
+        .page-input:focus {
+            outline: none;
+            background: rgba(255,255,255,0.35);
+        }
+        
+        .right-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .upload-btn {
+            padding: 8px 14px;
+            background: white;
             color: #667eea;
-            background: linear-gradient(to bottom, rgba(102,126,234,0.05), transparent);
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
         }
         
-        .tab.active::after {
-            width: 100%;
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         
-        .content {
+        #fileInput {
             display: none;
-            padding: 16px;
-            padding-bottom: 100px;
+        }
+        
+        .tool-btn {
+            padding: 7px 12px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            backdrop-filter: blur(10px);
+        }
+        
+        .tool-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .tool-btn:hover:not(:disabled) {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
+        }
+        
+        .tool-btn.primary {
+            background: rgba(255,255,255,0.9);
+            color: #667eea;
+            font-weight: 700;
+        }
+        
+        .tool-btn.success {
+            background: rgba(52, 199, 89, 0.9);
+            color: white;
+            border-color: rgba(52, 199, 89, 1);
+        }
+        
+        .tool-btn.danger {
+            background: rgba(255, 59, 48, 0.9);
+            color: white;
+            border-color: rgba(255, 59, 48, 1);
+        }
+        
+        .more-btn {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            font-size: 18px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .more-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+        
+        /* Карусель миниатюр */
+        .thumbnails-container {
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(15px);
+            padding: 12px 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            max-height: 0;
+            opacity: 0;
+            transition: all 0.4s ease;
+            scrollbar-width: none;
             position: relative;
-            z-index: 1;
+            z-index: 99;
+            flex-shrink: 0;
         }
         
-        .content.active {
+        .thumbnails-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .thumbnails-container.visible {
+            max-height: 200px;
+            opacity: 1;
+        }
+        
+        .thumbnails-wrapper {
+            display: inline-flex;
+            gap: 12px;
+            padding: 0 16px;
+        }
+        
+        .thumbnail-item {
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .thumbnail-canvas {
             display: block;
-            animation: fadeIn 0.5s ease-out;
+            height: 140px;
+            width: auto;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s;
         }
         
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
+        @media (min-width: 768px) {
+            .thumbnail-canvas {
+                height: 160px;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            
+            .thumbnails-container.visible {
+                max-height: 220px;
             }
         }
         
-        .search {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(30px) saturate(180%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%);
-            border-radius: 16px;
-            padding: 14px;
-            margin-bottom: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-            border: 0.5px solid rgba(255,255,255,0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .search:hover {
-            box-shadow: 0 12px 40px rgba(102,126,234,0.15);
+        .thumbnail-item:hover .thumbnail-canvas {
+            border-color: rgba(255,255,255,0.6);
             transform: translateY(-2px);
         }
         
-        .search input {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid rgba(102,126,234,0.1);
-            border-radius: 12px;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            background: rgba(255,255,255,0.5);
+        .thumbnail-item.active .thumbnail-canvas {
+            border-color: #34c759;
+            border-width: 4px;
+            box-shadow: 0 4px 16px rgba(52, 199, 89, 0.5);
         }
         
-        .search input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
-            background: rgba(255,255,255,0.9);
+        .thumbnail-number {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 3px 7px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            pointer-events: none;
         }
         
-        .grid {
-            display: grid;
-            gap: 12px;
+        /* РЕЖИМ ВЫБОРА СТРАНИЦ */
+        .page-selector-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 500;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
-        .card {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(30px) saturate(180%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%);
-            border-radius: 16px;
-            padding: 16px;
-            cursor: pointer;
-            border: 0.5px solid rgba(255,255,255,0.3);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        .page-selector-overlay.active {
             display: flex;
-            gap: 12px;
-            align-items: start;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            position: relative;
-            overflow: hidden;
+            opacity: 1;
         }
         
-        .card::before {
-            content: '';
+        .page-selector-header {
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(15px);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+        
+        .page-selector-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .page-selector-count {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+            margin-left: 8px;
+        }
+        
+        .page-selector-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .page-selector-grid {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-content: flex-start;
+            justify-content: flex-start;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .page-selector-grid::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        .page-selector-grid::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+        }
+        
+        .page-selector-grid::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 6px;
+        }
+        
+        .page-selector-item {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            width: calc(33.333% - 11px);
+            flex-shrink: 0;
+        }
+        
+        @media (min-width: 768px) {
+            .page-selector-item {
+                width: calc(16.666% - 14px);
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .page-selector-item {
+                width: calc(12.5% - 14px);
+            }
+        }
+        
+        .page-selector-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        
+        .page-selector-canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            border: 4px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .page-selector-item.selected .page-selector-canvas {
+            border-color: #34c759;
+        }
+        
+        .page-selector-checkbox {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+        
+        .page-selector-item.selected .page-selector-checkbox {
+            background: #34c759;
+            border-color: #34c759;
+        }
+        
+        .page-selector-checkbox::after {
+            content: '✓';
+            color: white;
+            font-size: 16px;
+            font-weight: 900;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .page-selector-item.selected .page-selector-checkbox::after {
+            opacity: 1;
+        }
+        
+        .page-selector-label {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            padding: 6px 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            pointer-events: none;
+        }
+        
+        /* Панель дополнительных инструментов */
+        .extra-tools {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 16px;
+            display: none;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        
+        .extra-tools.visible {
+            display: flex;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .input-group label {
+            font-size: 11px;
+            color: white;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .input-group input[type="text"],
+        .input-group input[type="number"] {
+            padding: 6px 10px;
+            background: rgba(255,255,255,0.25);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            color: white;
+            font-size: 12px;
+            width: 120px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            background: rgba(255,255,255,0.35);
+        }
+        
+        .input-group input[type="number"] {
+            width: 60px;
+        }
+        
+        .input-group input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+        
+        /* Основная область - ВСЕГДА СКРОЛЛИТСЯ */
+        .main-area {
+            flex: 1;
+            display: flex;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .canvas-area {
+            flex: 1;
+            overflow: auto;
+            background: rgba(0,0,0,0.15);
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .canvas-area::-webkit-scrollbar {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .canvas-area::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            margin: 4px;
+        }
+        
+        .canvas-area::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            border: 4px solid transparent;
+            background-clip: padding-box;
+        }
+        
+        .canvas-area::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.4);
+            background-clip: padding-box;
+        }
+        
+        .canvas-container {
+            min-height: 100%;
+            min-width: 100%;
+            display: inline-block;
+            padding: 40px;
+            position: relative;
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .canvas-container.swiping {
+            transition: none;
+        }
+        
+        .canvas-wrapper {
+            position: relative;
+            display: inline-block;
+            background: white;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            border-radius: 4px;
+            overflow: visible;
+            transform-origin: center center;
+            transition: transform 0.2s ease-out;
+        }
+        
+        #pdfCanvas {
+            display: block;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+        
+        .selection-overlay {
+            position: absolute;
+            border: 3px solid #667eea;
+            background: rgba(102, 126, 234, 0.15);
+            display: none;
+            box-shadow: 0 0 0 2px white, 0 4px 12px rgba(102, 126, 234, 0.5);
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .selection-overlay.active {
+            pointer-events: all;
+        }
+        
+        .selection-handle {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            display: none;
+            pointer-events: all;
+            z-index: 101;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .selection-overlay.active .selection-handle {
+            display: block;
+        }
+        
+        .handle-tl { top: -16px; left: -16px; cursor: nw-resize; }
+        .handle-tr { top: -16px; right: -16px; cursor: ne-resize; }
+        .handle-bl { bottom: -16px; left: -16px; cursor: sw-resize; }
+        .handle-br { bottom: -16px; right: -16px; cursor: se-resize; }
+        .handle-t { top: -16px; left: 50%; margin-left: -16px; cursor: n-resize; }
+        .handle-b { bottom: -16px; left: 50%; margin-left: -16px; cursor: s-resize; }
+        .handle-l { left: -16px; top: 50%; margin-top: -16px; cursor: w-resize; }
+        .handle-r { right: -16px; top: 50%; margin-top: -16px; cursor: e-resize; }
+        
+        .selection-body {
             position: absolute;
             top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(102,126,234,0.1), transparent);
-            transition: left 0.5s ease;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            cursor: move;
+            z-index: 100;
         }
         
-        .card:hover::before {
-            left: 100%;
-        }
-        
-        .card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 12px 40px rgba(102,126,234,0.15);
-            border-color: rgba(102,126,234,0.3);
-            background: rgba(255, 255, 255, 0.85);
-        }
-        
-        .card.selected {
-            border-color: #667eea;
-            box-shadow: 0 8px 30px rgba(102,126,234,0.25);
-            background: linear-gradient(to right, rgba(102,126,234,0.1), rgba(255,255,255,0.85));
-        }
-        
-        .card-left {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            align-items: center;
-        }
-        
-        .card-checkbox {
-            width: 24px;
-            height: 24px;
-            min-width: 24px;
-            cursor: pointer;
-            accent-color: #667eea;
-        }
-        
-        .quantity-control {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            align-items: center;
-        }
-        
-        .quantity-btn {
-            width: 28px;
-            height: 28px;
-            border: 2px solid #667eea;
-            background: rgba(255,255,255,0.8);
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            color: #667eea;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-        }
-        
-        .quantity-btn:hover {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        .selection-info {
+            position: absolute;
+            top: -32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            transform: scale(1.1);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 102;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
         
-        .quantity-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .quantity-display {
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        .long-press-hint {
+            position: absolute;
+            background: rgba(102, 126, 234, 0.95);
             color: white;
+            padding: 8px 12px;
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
+            font-size: 11px;
+            font-weight: 600;
+            pointer-events: none;
+            z-index: 150;
+            display: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+        }
+        
+        .long-press-hint.visible {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .zoom-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 14px;
             font-weight: 700;
-            box-shadow: 0 2px 8px rgba(102,126,234,0.3);
+            display: none;
+            z-index: 200;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            pointer-events: none;
         }
         
-        .card-content {
-            flex: 1;
+        .zoom-indicator.visible {
+            display: block;
         }
         
-        .card-title {
-            font-size: 16px;
+        .gpu-badge {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: rgba(52, 199, 89, 0.9);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 9px;
             font-weight: 700;
-            margin-bottom: 6px;
-            color: #1f2937;
+            display: none;
+            z-index: 200;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(52, 199, 89, 0.4);
         }
         
-        .card-text {
+        .gpu-badge.visible {
+            display: block;
+        }
+        
+        .page-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 16px;
+            font-size: 48px;
+            font-weight: 900;
+            display: none;
+            z-index: 300;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+        
+        .page-indicator.visible {
+            display: block;
+            animation: pageIndicatorPulse 0.25s ease;
+        }
+        
+        @keyframes pageIndicatorPulse {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        .status-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
             font-size: 13px;
-            color: #6b7280;
-            line-height: 1.5;
-        }
-        
-        .section {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(30px) saturate(180%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-            border: 0.5px solid rgba(255,255,255,0.3);
-            transition: all 0.3s ease;
-            animation: slideUp 0.6s ease-out;
+            font-weight: 600;
+            display: none;
+            box-shadow: 0 6px 20px rgba(52, 199, 89, 0.4);
+            z-index: 3000;
+            animation: slideUp 0.3s ease;
         }
         
         @keyframes slideUp {
             from {
+                transform: translateX(-50%) translateY(100px);
                 opacity: 0;
-                transform: translateY(30px);
             }
             to {
+                transform: translateX(-50%) translateY(0);
                 opacity: 1;
-                transform: translateY(0);
             }
         }
-        
-        .section:hover {
-            box-shadow: 0 12px 40px rgba(102,126,234,0.12);
-            transform: translateY(-2px);
-        }
-        
-        .section-title {
-            font-size: 16px;
-            font-weight: 800;
-            margin-bottom: 14px;
-            color: #1f2937;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-bottom: 12px;
-            color: white;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
-            text-decoration: none;
-            display: block;
-            text-align: center;
-        }
-        
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.25);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        .btn.primary { 
-            background: linear-gradient(135deg, #667eea, #764ba2);
-        }
-        .btn.success { 
-            background: linear-gradient(135deg, #10B981, #059669);
-        }
-        .btn.info { 
-            background: linear-gradient(135deg, #3B82F6, #2563EB);
-        }
-        .btn.danger { 
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-        }
-        .btn.secondary { 
-            background: rgba(243,244,246,0.9);
-            color: #1F2937;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        .btn.cloud { 
-            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
-        }
-        .btn.warning { 
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-        }
-        .btn.print { 
-            background: linear-gradient(135deg, #60a5fa, #3b82f6);
-        }
-        .btn.usb { 
-            background: linear-gradient(135deg, #f472b6, #ec4899);
-        }
-        
-        .btn:disabled { 
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .btn:active:not(:disabled) { 
-            transform: scale(0.96);
-        }
-        .btn:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        input[type="text"], textarea, select {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid rgba(102,126,234,0.15);
-            border-radius: 12px;
-            font-size: 15px;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
-            background: rgba(255,255,255,0.7);
-        }
-        
-        input[type="text"]:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
-            background: rgba(255,255,255,0.95);
-            transform: translateY(-2px);
-        }
-        
-        input[type="file"] { display: none; }
-        textarea { 
-            min-height: 120px;
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 13px;
-            resize: vertical;
-        }
-        
-        select {
-            cursor: pointer;
-        }
-        
-        .preview {
-            background: linear-gradient(135deg, rgba(102,126,234,0.05), rgba(246,147,251,0.05));
-            border: 3px dashed #667eea;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 16px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 200px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .preview::before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(102,126,234,0.1) 10%, transparent 10%);
-            background-size: 20px 20px;
-            animation: movePreview 15s linear infinite;
-        }
-        
-        @keyframes movePreview {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(20px, 20px); }
-        }
-        
-        .label {
-            width: 40mm;
-            height: 30mm;
-            border: 3px solid #1f2937;
+
+        .empty-state {
             display: flex;
             flex-direction: column;
+            align-items: center;
             justify-content: center;
-            padding: 1mm 2mm;
-            font-size: 10pt;
-            text-align: center;
-            line-height: 1.2;
-            background: white;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            border-radius: 4px;
-            position: relative;
-            z-index: 1;
-            transition: all 0.3s ease;
-        }
-        
-        .label:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 50px rgba(102,126,234,0.25);
-        }
-        
-        .controls {
-            background: linear-gradient(to bottom, rgba(249,250,251,0.8), rgba(243,244,246,0.8));
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 0.5px solid rgba(255,255,255,0.5);
-        }
-        
-        .control {
-            margin-bottom: 28px;
-        }
-        
-        .control:last-child {
-            margin-bottom: 0;
-        }
-        
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 14px;
-            font-weight: 700;
-            color: #374151;
-        }
-        
-        .control-value {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            height: 100%;
             color: white;
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 700;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
-            animation: bounce 1s ease infinite;
         }
-        
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
+
+        .empty-state-icon {
+            font-size: 70px;
+            margin-bottom: 15px;
+            opacity: 0.5;
         }
-        
-        .slider {
-            width: 100%;
-            height: 10px;
-            -webkit-appearance: none;
-            background: linear-gradient(to right, #667eea, #764ba2, #f093fb);
-            border-radius: 10px;
-            outline: none;
-            position: relative;
+
+        .empty-state-text {
+            font-size: 16px;
+            font-weight: 600;
         }
-        
-        .slider::before {
-            content: '';
-            position: absolute;
+
+        #hiddenCanvas {
+            display: none;
+        }
+
+        .dimension-info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 20;
+        }
+
+        .dimension-info.visible {
+            display: block;
+        }
+
+        .dimension-info strong {
+            color: #1a1a1a;
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            border-radius: 10px;
-            animation: shimmer 2s linear infinite;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
         }
-        
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
-            border: 3px solid white;
-            transition: all 0.3s ease;
-        }
-        
-        .slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 6px 20px rgba(102,126,234,0.5);
-        }
-        
-        .slider::-moz-range-thumb {
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 50%;
-            cursor: pointer;
-            border: 3px solid white;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
-            transition: all 0.3s ease;
-        }
-        
-        .slider::-moz-range-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 6px 20px rgba(102,126,234,0.5);
-        }
-        
-        .toggle {
+
+        .modal.active {
             display: flex;
-            gap: 10px;
         }
-        
-        .toggle button {
-            flex: 1;
-            padding: 14px;
-            border: 2px solid rgba(102,126,234,0.15);
-            background: rgba(255,255,255,0.7);
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 700;
-            color: #6b7280;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .toggle button.active {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            box-shadow: 0 6px 20px rgba(102,126,234,0.3);
-            transform: scale(1.05);
-        }
-        
-        .hint {
-            font-size: 13px;
-            color: #6b7280;
-            line-height: 1.6;
-        }
-        
-        .empty {
-            text-align: center;
-            padding: 60px 20px;
-            color: white;
-            font-size: 16px;
-        }
-        
-        .empty-icon {
-            font-size: 60px;
-            margin-bottom: 16px;
-            animation: float 3s ease-in-out infinite;
-        }
-        
-        .toast {
-            position: fixed;
-            bottom: 90px;
-            left: 16px;
-            right: 16px;
-            background: rgba(31,41,55,0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            color: white;
-            padding: 16px;
+
+        .modal-content {
+            background: white;
             border-radius: 16px;
-            z-index: 1000;
-            animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 600;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 2001;
         }
-        
-        @keyframes slideInUp {
-            from {
-                transform: translateY(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .toast.success { 
-            background: linear-gradient(135deg, rgba(16,185,129,0.95), rgba(5,150,105,0.95));
-        }
-        .toast.error { 
-            background: linear-gradient(135deg, rgba(245,87,108,0.95), rgba(239,68,68,0.95));
-        }
-        
-        .cloud-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 13px;
+
+        .modal-header {
+            font-size: 18px;
             font-weight: 700;
-            color: #1f2937;
-            padding: 14px;
-            background: linear-gradient(135deg, rgba(219,234,254,0.7), rgba(191,219,254,0.7));
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 0.5px solid rgba(59,130,246,0.3);
-            border-radius: 12px;
-            margin-bottom: 12px;
-        }
-
-        .cloud-status .icon { 
-            font-size: 20px;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .file-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-
-        .file-row .btn {
-            flex: 1;
-            margin-bottom: 0;
-        }
-
-        .info-box {
-            background: linear-gradient(135deg, rgba(254,243,199,0.7), rgba(253,230,138,0.7));
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 0.5px solid rgba(251,191,36,0.3);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 12px;
-            font-size: 13px;
-            line-height: 1.6;
-            font-weight: 500;
-        }
-
-        .usb-info {
-            background: linear-gradient(135deg, rgba(251,207,232,0.7), rgba(249,168,212,0.7));
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 0.5px solid rgba(236,72,153,0.3);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 12px;
-            font-size: 13px;
-            line-height: 1.6;
-            font-weight: 500;
-        }
-
-        .usb-status {
-            padding: 14px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            font-weight: 700;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-
-        .usb-status.connected {
-            background: linear-gradient(135deg, rgba(209,250,229,0.7), rgba(167,243,208,0.7));
-            color: #065F46;
-            border: 0.5px solid rgba(16,185,129,0.3);
-        }
-
-        .usb-status.disconnected {
-            background: linear-gradient(135deg, rgba(254,226,226,0.7), rgba(254,202,202,0.7));
-            color: #991B1B;
-            border: 0.5px solid rgba(239,68,68,0.3);
-        }
-
-        .selection-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(40px) saturate(180%);
-            -webkit-backdrop-filter: blur(40px) saturate(180%);
-            padding: 14px 16px;
-            box-shadow: 0 -8px 32px rgba(0,0,0,0.1);
-            display: none;
-            gap: 10px;
-            z-index: 101;
-            border-top: 0.5px solid rgba(255,255,255,0.3);
-        }
-
-        .selection-bar.visible {
-            display: flex;
-            animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .selection-info {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            font-size: 15px;
+            margin-bottom: 6px;
         }
 
-        .selection-actions {
+        .modal-description {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .format-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .format-option {
+            padding: 12px;
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .format-option:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .format-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .format-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 2px;
+        }
+
+        .format-size {
+            font-size: 10px;
+            color: #8e8e93;
+        }
+
+        .modal-actions {
             display: flex;
             gap: 8px;
         }
 
-        .selection-actions button {
-            padding: 12px 18px;
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
             border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 700;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+            transition: all 0.3s;
         }
 
-        .selection-actions button:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+        .modal-btn-cancel {
+            background: #f8f9fa;
+            color: #1a1a1a;
         }
 
-        .selection-actions .btn-usb {
-            background: linear-gradient(135deg, #f472b6, #ec4899);
+        .modal-btn-cancel:hover {
+            background: #e5e5e5;
+        }
+
+        .modal-btn-confirm {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            box-shadow: 0 3px 12px rgba(102, 126, 234, 0.3);
         }
 
-        .selection-actions .btn-pdf {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            color: white;
-        }
-
-        .selection-actions .btn-png {
-            background: linear-gradient(135deg, #10B981, #059669);
-            color: white;
-        }
-
-        .selection-actions .btn-print {
-            background: linear-gradient(135deg, #60a5fa, #3b82f6);
-            color: white;
-        }
-
-        .selection-actions .btn-clear {
-            background: rgba(243,244,246,0.9);
-            color: #1F2937;
-            min-width: 44px;
+        .overlap-info {
+            font-size: 10px;
+            color: #667eea;
+            margin-bottom: 12px;
+            padding: 6px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 6px;
         }
         
-        @media print {
-            @page {
-                size: 40mm 30mm;
-                margin: 0;
-            }
-            
-            * {
-                margin: 0;
-                padding: 0;
-            }
-            
-            body {
-                margin: 0;
-                padding: 0;
-                background: white;
-            }
-            
-            body > *:not(#printArea) {
-                display: none !important;
-            }
-            
-            #printArea {
-                display: block !important;
-                margin: 0;
-                padding: 0;
-            }
-            
-            .print-label {
-                width: 40mm;
-                height: 30mm;
-                border: 2px solid #000;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                text-align: center;
-                margin: 0;
-                padding: 0 2mm;
-                box-sizing: border-box;
-                page-break-after: always;
-                background: white;
-            }
-
-            .print-label:last-child {
-                page-break-after: avoid;
-            }
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            z-index: 9999;
+            display: none;
         }
         
-        #printArea { display: none; }
+        .progress-bar.active {
+            display: block;
+            animation: progress 1.5s ease-in-out;
+        }
+        
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+        
+        @media (max-width: 768px) {
+            .logo-title {
+                font-size: 16px;
+            }
+            
+            .logo-subtitle {
+                font-size: 8px;
+            }
+            
+            .tool-btn {
+                font-size: 10px;
+                padding: 6px 10px;
+            }
+            
+            .top-toolbar {
+                padding: 10px 12px;
+            }
+            
+            .left-section, .right-section {
+                gap: 8px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">
-            <div class="logo-icon">🏷️</div>
-            <h1>Эмиль Бирки</h1>
+    <canvas id="hiddenCanvas"></canvas>
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="gpu-badge" id="gpuBadge">⚡ GPU</div>
+    <div class="page-indicator" id="pageIndicator">1</div>
+    
+    <!-- Полноэкранный режим выбора страниц -->
+    <div class="page-selector-overlay" id="pageSelectorOverlay">
+        <div class="page-selector-header">
+            <div>
+                <span class="page-selector-title">Выбор страниц</span>
+                <span class="page-selector-count" id="pageSelectorCount">Выбрано: 0</span>
+            </div>
+            <div class="page-selector-actions">
+                <button class="tool-btn success" onclick="extractSelectedPages()" id="extractSelectedBtn" disabled>✓ Извлечь</button>
+                <button class="tool-btn danger" onclick="closePageSelector()">✕ Отмена</button>
+            </div>
         </div>
-        <div class="stats" id="stats">0</div>
+        <div class="page-selector-grid" id="pageSelectorGrid"></div>
     </div>
     
-    <div class="tabs">
-        <button class="tab active" id="tabList">📋 Список</button>
-        <button class="tab" id="tabEditor">✏️ Редактор</button>
-        <button class="tab" id="tabManage">⚙️ Управление</button>
-    </div>
-    
-    <div class="content active" id="tab0">
-        <div class="search">
-            <input type="text" id="search" placeholder="🔍 Поиск бирок...">
+    <!-- Модальное окно -->
+    <div class="modal" id="formatModal">
+        <div class="modal-content">
+            <div class="modal-header">Выберите формат печати</div>
+            <div class="modal-description">Большой лист будет разделён на листы выбранного формата с перекрытием для склейки</div>
+            
+            <div class="overlap-info">
+                <strong>Перекрытие:</strong> <span id="overlapDisplay">10</span> мм для удобной склейки
+            </div>
+            
+            <div class="format-grid">
+                <div class="format-option selected" data-format="a4" onclick="selectFormat('a4')">
+                    <div class="format-name">A4</div>
+                    <div class="format-size">210 × 297 мм</div>
+                </div>
+                <div class="format-option" data-format="a3" onclick="selectFormat('a3')">
+                    <div class="format-name">A3</div>
+                    <div class="format-size">297 × 420 мм</div>
+                </div>
+                <div class="format-option" data-format="a2" onclick="selectFormat('a2')">
+                    <div class="format-name">A2</div>
+                    <div class="format-size">420 × 594 мм</div>
+                </div>
+                <div class="format-option" data-format="a1" onclick="selectFormat('a1')">
+                    <div class="format-name">A1</div>
+                    <div class="format-size">594 × 841 мм</div>
+                </div>
+                <div class="format-option" data-format="a0" onclick="selectFormat('a0')">
+                    <div class="format-name">A0</div>
+                    <div class="format-size">841 × 1189 мм</div>
+                </div>
+                <div class="format-option" data-format="letter" onclick="selectFormat('letter')">
+                    <div class="format-name">Letter</div>
+                    <div class="format-size">216 × 279 мм</div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeFormatModal()">Отмена</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmTiling()">Разделить</button>
+            </div>
         </div>
-        <div id="grid" class="grid"></div>
     </div>
     
-    <div class="content" id="tab1">
-        <div class="section">
-            <div class="section-title">✏️ Текст бирки</div>
-            <div id="hint" class="hint">Выбери бирку из списка для редактирования</div>
-            <div id="editor" style="display:none">
-                <input type="text" id="l1" placeholder="Группа">
-                <input type="text" id="l2" placeholder="Описание">
-                <input type="text" id="l3" placeholder="Кабель">
-                <input type="text" id="l4" placeholder="От щита (заполняется автоматически)">
-                <input type="text" id="l5" placeholder="Длина">
+    <div class="layout">
+        <!-- ЕДИНАЯ ВЕРХНЯЯ ПАНЕЛЬ -->
+        <div class="top-toolbar">
+            <div class="left-section">
+                <!-- КРАСИВЫЙ ЛОГОТИП -->
+                <div class="logo-section">
+                    <div class="logo-icon">📄</div>
+                    <div class="logo-text">
+                        <div class="logo-title">ЭМИЛЬ PDF</div>
+                        <div class="logo-subtitle">EDITOR</div>
+                    </div>
+                </div>
+                
+                <!-- НАВИГАЦИЯ ПО СТРАНИЦАМ -->
+                <div class="page-nav-section">
+                    <button class="page-nav-btn" onclick="prevPage()">◀</button>
+                    <span class="page-info">
+                        <input type="number" id="pageNum" class="page-input" value="1" min="1"> 
+                        / <span id="pageCount">0</span>
+                    </span>
+                    <button class="page-nav-btn" onclick="nextPage()">▶</button>
+                </div>
+            </div>
+            
+            <div class="right-section">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    📂 Загрузить PDF
+                </button>
+                <input type="file" id="fileInput" accept="application/pdf">
+                
+                <button class="tool-btn primary" id="cropBtn" disabled>✂️ Сохранить</button>
+                <button class="tool-btn success" id="printBtn" disabled>🖨️ Печать</button>
+                <button class="tool-btn" id="resetBtn" disabled>🔄 Сбросить</button>
+                <button class="tool-btn" id="tileBtn" disabled>📐 Разделить</button>
+                <button class="tool-btn" id="fitBtn" disabled>⬌ По ширине</button>
+                <button class="tool-btn" id="extractVisualBtn" disabled onclick="openPageSelector()">🎯 Выбрать</button>
+                <button class="more-btn" onclick="toggleExtraTools()">⋮</button>
             </div>
         </div>
         
-        <div class="section">
-            <div class="section-title">👁️ Превью</div>
-            <div class="preview">
-                <div class="label" id="preview">
-                    <div class="line1"></div>
-                    <div class="line2"></div>
-                    <div class="line3"></div>
-                    <div class="line4"></div>
-                    <div class="line5"></div>
-                </div>
+        <!-- Карусель миниатюр -->
+        <div class="thumbnails-container" id="thumbnailsContainer">
+            <div class="thumbnails-wrapper" id="thumbnailsWrapper"></div>
+        </div>
+        
+        <!-- Дополнительная панель -->
+        <div class="extra-tools" id="extraTools">
+            <div class="input-group">
+                <label>Извлечь номера:</label>
+                <input type="text" id="pageRange" placeholder="1-3, 5, 7-9">
+                <button class="tool-btn" id="extractBtn" disabled onclick="extractByNumbers()">📑 Извлечь</button>
             </div>
             
-            <div class="controls">
-                <div class="control">
-                    <div class="control-label">
-                        <span>📝 Размер 1-й строки</span>
-                        <div class="control-value" id="v1">12pt</div>
-                    </div>
-                    <input type="range" class="slider" id="s1" min="8" max="18" value="12" step="0.5">
-                </div>
-                
-                <div class="control">
-                    <div class="control-label"><span>💪 Жирность 1-й строки</span></div>
-                    <div class="toggle" id="toggle1">
-                        <button data-weight="normal">Обычная</button>
-                        <button data-weight="bold" class="active">Жирная</button>
-                    </div>
-                </div>
-                
-                <div class="control">
-                    <div class="control-label">
-                        <span>📝 Размер остальных строк</span>
-                        <div class="control-value" id="v2">10pt</div>
-                    </div>
-                    <input type="range" class="slider" id="s2" min="7" max="16" value="10" step="0.5">
-                </div>
-                
-                <div class="control">
-                    <div class="control-label"><span>💪 Жирность остальных</span></div>
-                    <div class="toggle" id="toggle2">
-                        <button data-weight="normal" class="active">Обычная</button>
-                        <button data-weight="bold">Жирная</button>
-                    </div>
-                </div>
-                
-                <div class="control">
-                    <div class="control-label">
-                        <span>↕️ Интервал между строками</span>
-                        <div class="control-value" id="v3">1.2</div>
-                    </div>
-                    <input type="range" class="slider" id="s3" min="0.9" max="1.6" value="1.2" step="0.05">
-                </div>
-                
-                <div class="control">
-                    <div class="control-label">
-                        <span>⬇️ Отступ сверху</span>
-                        <div class="control-value" id="v4">0.5мм</div>
-                    </div>
-                    <input type="range" class="slider" id="s4" min="0" max="6" value="0.5" step="0.5">
-                </div>
+            <div class="input-group">
+                <label>Перекрытие (мм):</label>
+                <input type="number" id="overlap" value="10" min="0" max="30" onchange="updateOverlapDisplay()">
             </div>
         </div>
         
-        <div class="section">
-            <div class="section-title">🔌 USB печать (Картинкой)</div>
-            
-            <div class="usb-info">
-                <strong>⚡ Печать попиксельно через USB!</strong><br>
-                Работает только в Chrome/Edge. Подключи принтер через USB и нажми "Подключить".
+        <!-- Основная область - ВСЕГДА СКРОЛЛИТСЯ -->
+        <div class="main-area">
+            <div class="canvas-area" id="canvasArea">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">📋</div>
+                    <div class="empty-state-text">Загрузите PDF документ</div>
+                </div>
+                
+                <div class="canvas-container" id="canvasContainer" style="display: none;">
+                    <div class="canvas-wrapper" id="canvasWrapper">
+                        <canvas id="pdfCanvas"></canvas>
+                        <div class="selection-overlay" id="selectionOverlay">
+                            <div class="selection-info" id="selectionInfo"></div>
+                            <div class="selection-body" id="selectionBody"></div>
+                            <div class="selection-handle handle-tl" data-handle="tl"></div>
+                            <div class="selection-handle handle-tr" data-handle="tr"></div>
+                            <div class="selection-handle handle-bl" data-handle="bl"></div>
+                            <div class="selection-handle handle-br" data-handle="br"></div>
+                            <div class="selection-handle handle-t" data-handle="t"></div>
+                            <div class="selection-handle handle-b" data-handle="b"></div>
+                            <div class="selection-handle handle-l" data-handle="l"></div>
+                            <div class="selection-handle handle-r" data-handle="r"></div>
+                        </div>
+                    </div>
+                    <div class="long-press-hint" id="longPressHint">Удерживайте для выделения</div>
+                </div>
             </div>
-            
-            <div class="usb-status disconnected" id="usbStatus">
-                🔴 Принтер не подключен
-            </div>
-            
-            <button class="btn usb" id="usbConnectBtn">🔌 Подключить USB принтер</button>
-            <button class="btn usb" id="usbPrintBtn" disabled>⚡ Печать через USB</button>
-        </div>
-        
-        <div class="section">
-            <div class="section-title">📄 Экспорт</div>
-            
-            <button class="btn success" id="pngBtn" disabled>🖼️ Скачать PNG</button>
-            <button class="btn danger" id="pdfBtn" disabled>📄 Скачать PDF</button>
-            <button class="btn print" id="printBtn" disabled>🖨️ Обычная печать</button>
-            <button class="btn primary" id="saveBtn" disabled>💾 Сохранить изменения</button>
         </div>
     </div>
     
-    <div class="content" id="tab2">
-        <div class="section">
-            <div class="section-title">🔧 Исправления</div>
-            <div class="hint" style="margin-bottom: 12px;">
-                Убрать цифровые суффиксы из поля "От щита"<br>
-                Например: "от ЩР-П-1" → "от ЩР-П"
-            </div>
-            <button class="btn warning" id="fixBtn">🔧 Исправить все бирки</button>
-        </div>
-
-        <div class="section">
-            <div class="section-title">💾 Локальное хранилище</div>
-            
-            <div class="cloud-status">
-                <span class="icon">📱</span>
-                <span id="localStatus">Загрузка...</span>
-            </div>
-
-            <input type="file" id="fileInput" accept=".json">
-            <div class="file-row">
-                <button class="btn info" id="loadFileBtn">📂 Загрузить JSON</button>
-                <button class="btn success" id="saveFileBtn">💾 Скачать JSON</button>
-            </div>
-        </div>
-
-        <div class="section">
-            <div class="section-title">☁️ База данных на Яндекс.Диске</div>
-            
-            <div class="cloud-status">
-                <span class="icon">☁️</span>
-                <span>Скачай файл JSON с Яндекс.Диска, затем загрузи его через кнопку выше</span>
-            </div>
-
-            <a href="https://disk.yandex.ru/d/AZzpGJ765_EA_w" target="_blank" class="btn cloud">📥 Открыть Яндекс.Диск</a>
-        </div>
-
-        <div class="section">
-            <div class="section-title">📥 Импорт текстом</div>
-            <div class="hint" style="margin-bottom: 12px;">
-                Каждая бирка через пустую строку
-            </div>
-            <textarea id="import" placeholder="1РП3-Гр.-3.1
-Освещение электрощитовой
-ВВГнг(А)-LSLTx 3×1.5
-от 1РП3
-L=15м
-
-1РП3-ЩО-0.1
-ЩО-0
-ВВГнг(А)-LSLTx 5×2.5
-от 1РП3
-L=50м"></textarea>
-            <button class="btn primary" id="importBtn">📥 Импортировать</button>
-        </div>
+    <div class="zoom-indicator" id="zoomIndicator">100%</div>
+    <div class="dimension-info" id="dimensionInfo">
+        Размер страницы: <strong id="pageDimensions">-</strong>
     </div>
-    
-    <div class="selection-bar" id="selectionBar">
-        <div class="selection-info">
-            <span>🏷️</span>
-            <span id="selectionCount">0</span>
-            <span>шт</span>
-            <span>•</span>
-            <span id="totalQuantity">0</span>
-            <span>печати</span>
-        </div>
-        <div class="selection-actions">
-            <button class="btn-usb" id="batchUsbBtn">⚡</button>
-            <button class="btn-png" id="batchPngBtn">🖼️</button>
-            <button class="btn-pdf" id="batchPdfBtn">📄</button>
-            <button class="btn-print" id="batchPrintBtn">🖨️</button>
-            <button class="btn-clear" id="clearSelectionBtn">✕</button>
-        </div>
-    </div>
-
-    <div id="printArea"></div>
-
-    <!-- Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <div class="status-toast" id="statusToast">✓ Готово!</div>
 
     <script>
-        let labels = [];
-        let filtered = [];
-        let idx = -1;
-        let w1 = 'bold';
-        let w2 = 'normal';
-        let selectedIndices = new Map();
-        let usbDevice = null;
-        let usbEndpoint = null;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         
-        // АВТОЗАПОЛНЕНИЕ "От щита" из группы
-        function autoFillFromShield(groupName) {
-            if (!groupName) return '';
-            
-            const parts = groupName.split('-');
-            if (parts.length === 0) return '';
-            
-            let shieldName = parts[0];
-            
-            if (parts.length > 1) {
-                const secondPart = parts[1];
-                if (!/^\d+$/.test(secondPart)) {
-                    shieldName += '-' + secondPart;
-                }
-            }
-            
-            return 'от ' + shieldName;
-        }
+        let useWebGL = false;
+        let isHighPerformance = false;
         
-        function saveToStorage() {
-            try {
-                localStorage.setItem('birki_labels', JSON.stringify(labels));
-                updateLocalStatus();
-            } catch(e) {
-                console.error('Ошибка сохранения:', e);
-            }
-        }
-        
-        function loadFromStorage() {
-            try {
-                const saved = localStorage.getItem('birki_labels');
-                if (saved) {
-                    labels = JSON.parse(saved);
-                    updateLocalStatus();
-                }
-            } catch(e) {
-                console.error('Ошибка загрузки:', e);
-            }
-        }
-        
-        function updateLocalStatus() {
-            document.getElementById('localStatus').textContent = 
-                labels.length > 0 ? `✅ ${labels.length} бирок` : '❌ Пусто';
-        }
-
-        function fixLabels() {
-            let fixed = 0;
-            labels.forEach(label => {
-                if (label.line4) {
-                    const parts = label.line4.split(' ');
-                    if (parts.length === 2 && parts[0] === 'от') {
-                        const code = parts[1];
-                        const codeParts = code.split('-');
-                        if (codeParts.length > 0) {
-                            const lastPart = codeParts[codeParts.length - 1];
-                            if (lastPart && /^\d/.test(lastPart)) {
-                                codeParts.pop();
-                                label.line4 = 'от ' + codeParts.join('-');
-                                fixed++;
-                            }
-                        }
-                    }
-                }
+        function detectGPUSupport() {
+            const testCanvas = document.createElement('canvas');
+            const gl = testCanvas.getContext('webgl2', {
+                alpha: false,
+                antialias: false,
+                powerPreference: 'high-performance',
+                desynchronized: true
+            }) || testCanvas.getContext('webgl', {
+                alpha: false,
+                antialias: false,
+                powerPreference: 'high-performance',
+                desynchronized: true
             });
             
-            if (fixed > 0) {
-                saveToStorage();
-                applySearch();
-                toast(`✅ Исправлено ${fixed} бирок!`, 'success');
-            } else {
-                toast('✅ Всё уже исправлено!', 'success');
-            }
-        }
-
-        function loadFromFile() {
-            document.getElementById('fileInput').click();
-        }
-
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                try {
-                    const data = JSON.parse(event.target.result);
-                    if (Array.isArray(data)) {
-                        labels = data;
-                        saveToStorage();
-                        updateStats();
-                        applySearch();
-                        toast(`✅ Загружено ${labels.length} бирок!`, 'success');
-                    } else {
-                        throw new Error('Неверный формат');
-                    }
-                } catch(err) {
-                    toast('❌ Ошибка чтения файла', 'error');
+            if (gl) {
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                if (debugInfo) {
+                    const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                    console.log('GPU:', renderer);
+                    isHighPerformance = /Apple|iPad|Metal/i.test(renderer);
                 }
-            };
-            reader.readAsText(file);
-        }
-
-        function saveToFile() {
-            const dataStr = JSON.stringify(labels, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'emil_birki_' + new Date().toISOString().slice(0,10) + '.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            toast('💾 Файл сохранён!', 'success');
+                useWebGL = true;
+                return true;
+            }
+            return false;
         }
         
-        function toast(msg, type) {
-            const t = document.createElement('div');
-            t.className = 'toast ' + (type || '');
-            t.textContent = msg;
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 3000);
+        const hasGPU = detectGPUSupport();
+        
+        let pdfDoc = null;
+        let pdfArrayBuffer = null;
+        let pageNum = 1;
+        let pageRendering = false;
+        let pageNumPending = null;
+        let displayScale = 1.5;
+        let highResScale = 3.0;
+        let canvas = document.getElementById('pdfCanvas');
+        let ctx = canvas.getContext('2d', { 
+            alpha: false,
+            desynchronized: true,
+            willReadFrequently: false 
+        });
+        let hiddenCanvas = document.getElementById('hiddenCanvas');
+        let hiddenCtx = hiddenCanvas.getContext('2d', { 
+            alpha: false,
+            willReadFrequently: false 
+        });
+        let canvasWrapper = document.getElementById('canvasWrapper');
+        let canvasContainer = document.getElementById('canvasContainer');
+        let canvasArea = document.getElementById('canvasArea');
+        let selectionOverlay = document.getElementById('selectionOverlay');
+        let selectionBody = document.getElementById('selectionBody');
+        let selectionInfo = document.getElementById('selectionInfo');
+        let longPressHint = document.getElementById('longPressHint');
+        let zoomIndicator = document.getElementById('zoomIndicator');
+        let gpuBadge = document.getElementById('gpuBadge');
+        let pageIndicator = document.getElementById('pageIndicator');
+        let selection = null;
+        let isDrawing = false;
+        let isMoving = false;
+        let isResizing = false;
+        let resizeHandle = null;
+        let startX, startY;
+        let offsetX, offsetY;
+        let currentPage = null;
+        let initialSelection = null;
+        let selectedFormat = 'a4';
+        
+        let longPressTimer = null;
+        let isLongPress = false;
+        let longPressStartX = 0;
+        let longPressStartY = 0;
+        const LONG_PRESS_DURATION = 500;
+        const MOVE_THRESHOLD = 10;
+        
+        let thumbnailHideTimeout = null;
+        
+        // PINCH ZOOM + WHEEL ZOOM
+        let currentScale = 1.0;
+        let minScale = 0.5;
+        let maxScale = 4.0;
+        
+        // СВАЙП
+        let swipeStartX = 0;
+        let swipeStartY = 0;
+        let swipeDelta = 0;
+        let isSwiping = false;
+        let isHorizontalSwipe = false;
+        const SWIPE_THRESHOLD_PERCENT = 0.15;
+        
+        let selectedPages = new Set();
+        
+        if (hasGPU) {
+            gpuBadge.classList.add('visible');
+            setTimeout(() => gpuBadge.classList.remove('visible'), 3000);
         }
         
-        function updateStats() {
-            document.getElementById('stats').textContent = labels.length;
-        }
-
-        function updateSelectionBar() {
-            const bar = document.getElementById('selectionBar');
-            const count = document.getElementById('selectionCount');
-            const total = document.getElementById('totalQuantity');
-            
-            const totalQty = Array.from(selectedIndices.values()).reduce((sum, qty) => sum + qty, 0);
-            
-            if (selectedIndices.size > 0) {
-                bar.classList.add('visible');
-                count.textContent = selectedIndices.size;
-                total.textContent = totalQty;
-            } else {
-                bar.classList.remove('visible');
-            }
-        }
-
-        function setQuantity(index, quantity) {
-            if (quantity > 0) {
-                selectedIndices.set(index, quantity);
-            } else {
-                selectedIndices.delete(index);
-            }
-            updateSelectionBar();
-            render();
-        }
-
-        function clearSelection() {
-            selectedIndices.clear();
-            updateSelectionBar();
-            render();
-        }
+        const paperFormats = {
+            a4: { width: 210, height: 297 },
+            a3: { width: 297, height: 420 },
+            a2: { width: 420, height: 594 },
+            a1: { width: 594, height: 841 },
+            a0: { width: 841, height: 1189 },
+            letter: { width: 216, height: 279 }
+        };
         
-        function render() {
-            const g = document.getElementById('grid');
-            g.innerHTML = '';
-            if (!filtered.length) {
-                g.innerHTML = '<div class="empty"><div class="empty-icon">🏷️</div><div>Нет бирок</div><small>Загрузи файл JSON</small></div>';
-                return;
-            }
-            filtered.forEach((l,i) => {
-                const isSelected = selectedIndices.has(i);
-                const quantity = selectedIndices.get(i) || 1;
-                
-                const c = document.createElement('div');
-                c.className = 'card' + (i===idx?' selected':'') + (isSelected?' selected':'');
-                
-                const leftDiv = document.createElement('div');
-                leftDiv.className = 'card-left';
-                
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.className = 'card-checkbox';
-                checkbox.checked = isSelected;
-                checkbox.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (checkbox.checked) {
-                        selectedIndices.set(i, 1);
-                    } else {
-                        selectedIndices.delete(i);
-                    }
-                    updateSelectionBar();
-                    render();
-                });
-                
-                const qtyControl = document.createElement('div');
-                qtyControl.className = 'quantity-control';
-                
-                if (isSelected) {
-                    const btnUp = document.createElement('button');
-                    btnUp.className = 'quantity-btn';
-                    btnUp.textContent = '▲';
-                    btnUp.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        setQuantity(i, quantity + 1);
-                    });
-                    
-                    const display = document.createElement('div');
-                    display.className = 'quantity-display';
-                    display.textContent = quantity;
-                    
-                    const btnDown = document.createElement('button');
-                    btnDown.className = 'quantity-btn';
-                    btnDown.textContent = '▼';
-                    btnDown.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if (quantity > 1) {
-                            setQuantity(i, quantity - 1);
-                        }
-                    });
-                    
-                    qtyControl.appendChild(btnUp);
-                    qtyControl.appendChild(display);
-                    qtyControl.appendChild(btnDown);
-                }
-                
-                leftDiv.appendChild(checkbox);
-                leftDiv.appendChild(qtyControl);
-                
-                const content = document.createElement('div');
-                content.className = 'card-content';
-                content.innerHTML = `<div class="card-title">${l.line1||l.id||''}</div><div class="card-text">${l.line2||l.label||''}</div><div class="card-text">${l.line3||l.reference||''}</div><div class="card-text">${l.line4||''}</div>`;
-                content.addEventListener('click', () => {
-                    idx = i;
-                    render();
-                    fillEditor();
-                    showTab(1);
-                });
-                
-                c.appendChild(leftDiv);
-                c.appendChild(content);
-                g.appendChild(c);
-            });
-        }
+        const fileInput = document.getElementById('fileInput');
+        const progressBar = document.getElementById('progressBar');
+        const thumbnailsContainer = document.getElementById('thumbnailsContainer');
+        const thumbnailsWrapper = document.getElementById('thumbnailsWrapper');
+        const pageSelectorOverlay = document.getElementById('pageSelectorOverlay');
+        const pageSelectorGrid = document.getElementById('pageSelectorGrid');
+        const pageSelectorCount = document.getElementById('pageSelectorCount');
+        const extractSelectedBtn = document.getElementById('extractSelectedBtn');
         
-        function applySearch() {
-            const q = document.getElementById('search').value.toLowerCase();
-            filtered = q ? labels.filter(l => Object.values(l).some(v => String(v).toLowerCase().includes(q))) : labels.slice();
-            selectedIndices.clear();
-            updateSelectionBar();
-            render();
-        }
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        }, { passive: false });
         
-        function showTab(n) {
-            document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
-            document.querySelectorAll('.content').forEach((c,i) => c.classList.toggle('active', i===n));
-        }
-        
-        function fillEditor() {
-            if (idx < 0) {
-                document.getElementById('editor').style.display = 'none';
-                document.getElementById('hint').style.display = 'block';
-                ['usbPrintBtn', 'printBtn', 'pngBtn', 'pdfBtn', 'saveBtn'].forEach(id => {
-                    document.getElementById(id).disabled = true;
-                });
-                return;
+        document.addEventListener('selectstart', (e) => {
+            if (!e.target.matches('input, textarea')) {
+                e.preventDefault();
+                return false;
             }
-            const l = filtered[idx];
-            const groupName = l.line1 || l.id || '';
-            
-            document.getElementById('l1').value = groupName;
-            document.getElementById('l2').value = l.line2 || l.label || '';
-            document.getElementById('l3').value = l.line3 || l.reference || '';
-            
-            if (!l.line4 || l.line4.trim() === '') {
-                l.line4 = autoFillFromShield(groupName);
-            }
-            document.getElementById('l4').value = l.line4 || '';
-            
-            document.getElementById('l5').value = l.line5 || '';
-            document.getElementById('editor').style.display = 'block';
-            document.getElementById('hint').style.display = 'none';
-            ['printBtn', 'pngBtn', 'pdfBtn', 'saveBtn'].forEach(id => {
-                document.getElementById(id).disabled = false;
-            });
-            if (usbDevice) {
-                document.getElementById('usbPrintBtn').disabled = false;
-            }
-            updatePreview();
-        }
-        
-        document.getElementById('l1').addEventListener('input', function() {
-            const groupName = this.value;
-            const l4Input = document.getElementById('l4');
-            
-            if (!l4Input.value || l4Input.value.startsWith('от ')) {
-                l4Input.value = autoFillFromShield(groupName);
-            }
-            
-            updatePreview();
         });
         
-        function updatePreview() {
-            const pt = parseFloat(document.getElementById('s4').value);
-            const lh = parseFloat(document.getElementById('s3').value);
-            const f1 = parseFloat(document.getElementById('s1').value);
-            const f2 = parseFloat(document.getElementById('s2').value);
+        // HAMMER.JS - PINCH ZOOM для iPad
+        const hammer = new Hammer(canvasWrapper);
+        hammer.get('pinch').set({ enable: true });
+        hammer.get('pan').set({ enable: false }); // Отключаем pan, оставляем браузерный скролл
+        
+        let lastScale = 1;
+        
+        hammer.on('pinchstart', (e) => {
+            lastScale = currentScale;
+        });
+        
+        hammer.on('pinchmove', (e) => {
+            let newScale = lastScale * e.scale;
+            newScale = Math.max(minScale, Math.min(maxScale, newScale));
             
-            const p = document.getElementById('preview');
-            p.style.paddingTop = pt + 'mm';
-            p.style.lineHeight = lh;
-            
-            const lines = p.querySelectorAll('div');
-            lines[0].textContent = document.getElementById('l1').value;
-            lines[0].style.fontSize = f1 + 'pt';
-            lines[0].style.fontWeight = w1;
-            
-            for (let i=1; i<5; i++) {
-                lines[i].textContent = document.getElementById('l'+(i+1)).value;
-                lines[i].style.fontSize = f2 + 'pt';
-                lines[i].style.fontWeight = w2;
+            currentScale = newScale;
+            canvasWrapper.style.transform = `scale(${currentScale})`;
+            updateZoomDisplay();
+        });
+        
+        hammer.on('pinchend', (e) => {
+            lastScale = currentScale;
+        });
+        
+        // WHEEL ZOOM для Mac/тачпада
+        canvasWrapper.addEventListener('wheel', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                
+                const delta = -e.deltaY;
+                const zoomIntensity = 0.001;
+                const newScale = currentScale + delta * zoomIntensity;
+                
+                currentScale = Math.max(minScale, Math.min(maxScale, newScale));
+                canvasWrapper.style.transform = `scale(${currentScale})`;
+                updateZoomDisplay();
             }
+        }, { passive: false });
+        
+        function updateZoomDisplay() {
+            const percent = Math.round(currentScale * 100);
+            zoomIndicator.textContent = percent + '%';
+            zoomIndicator.classList.add('visible');
             
-            document.getElementById('v1').textContent = f1 + 'pt';
-            document.getElementById('v2').textContent = f2 + 'pt';
-            document.getElementById('v3').textContent = lh.toFixed(2);
-            document.getElementById('v4').textContent = pt + 'мм';
+            setTimeout(() => {
+                zoomIndicator.classList.remove('visible');
+            }, 1500);
         }
-
-        // USB, PNG, PDF и остальные функции остаются без изменений
-        async function connectUSB() {
-            if (!navigator.usb) {
-                toast('❌ WebUSB не поддерживается! Используй Chrome/Edge', 'error');
-                return;
-            }
+        
+        function resetZoom() {
+            currentScale = 1.0;
+            lastScale = 1.0;
+            canvasWrapper.style.transform = 'scale(1)';
+        }
+        
+        function toggleExtraTools() {
+            document.getElementById('extraTools').classList.toggle('visible');
+        }
+        
+        function showThumbnails() {
+            thumbnailsContainer.classList.add('visible');
             
-            try {
-                usbDevice = await navigator.usb.requestDevice({
-                    filters: [
-                        { vendorId: 0x0416 },
-                        { vendorId: 0x1FC9 },
-                        { classCode: 7 }
-                    ]
-                });
+            if (thumbnailHideTimeout) clearTimeout(thumbnailHideTimeout);
+            thumbnailHideTimeout = setTimeout(() => {
+                thumbnailsContainer.classList.remove('visible');
+            }, 3000);
+        }
+        
+        canvasArea.addEventListener('click', (e) => {
+            if (e.target === canvasArea || e.target.closest('.canvas-container')) {
+                thumbnailsContainer.classList.remove('visible');
+            }
+        });
+        
+        async function generateThumbnails() {
+            thumbnailsWrapper.innerHTML = '';
+            
+            const thumbHeight = window.innerWidth >= 768 ? 160 : 140;
+            const scale = thumbHeight / (await pdfDoc.getPage(1)).getViewport({scale: 1}).height;
+            
+            for (let i = 1; i <= pdfDoc.numPages; i++) {
+                const page = await pdfDoc.getPage(i);
+                const viewport = page.getViewport({scale: scale});
                 
-                await usbDevice.open();
+                const thumbCanvas = document.createElement('canvas');
+                thumbCanvas.className = 'thumbnail-canvas';
+                thumbCanvas.width = viewport.width;
+                thumbCanvas.height = viewport.height;
                 
-                if (usbDevice.configuration === null) {
-                    await usbDevice.selectConfiguration(1);
-                }
+                const thumbCtx = thumbCanvas.getContext('2d');
+                await page.render({
+                    canvasContext: thumbCtx,
+                    viewport: viewport
+                }).promise;
                 
-                await usbDevice.claimInterface(0);
+                const thumbItem = document.createElement('div');
+                thumbItem.className = 'thumbnail-item';
+                thumbItem.dataset.page = i;
+                if (i === pageNum) thumbItem.classList.add('active');
                 
-                const ep = usbDevice.configuration.interfaces[0].alternate.endpoints.find(e => e.direction === 'out');
-                if (ep) usbEndpoint = ep.endpointNumber;
-                else usbEndpoint = 1;
+                const thumbNumber = document.createElement('div');
+                thumbNumber.className = 'thumbnail-number';
+                thumbNumber.textContent = i;
                 
-                document.getElementById('usbStatus').className = 'usb-status connected';
-                document.getElementById('usbStatus').textContent = '🟢 Принтер подключен: ' + (usbDevice.productName || 'USB Принтер');
+                thumbItem.appendChild(thumbCanvas);
+                thumbItem.appendChild(thumbNumber);
+                thumbItem.addEventListener('click', () => goToPage(i));
                 
-                if (idx >= 0) {
-                    document.getElementById('usbPrintBtn').disabled = false;
-                }
-                
-                toast('✅ USB принтер подключен!', 'success');
-                
-            } catch (error) {
-                console.error('Ошибка подключения USB:', error);
-                toast('❌ Не удалось подключиться: ' + error.message, 'error');
+                thumbnailsWrapper.appendChild(thumbItem);
             }
         }
         
-        async function printUSB() {
-            if (!usbDevice) {
-                toast('❌ Сначала подключи принтер!', 'error');
-                return;
-            }
-            
-            if (idx < 0) return;
-            
-            try {
-                const canvas = await html2canvas(document.getElementById('preview'), {
-                    scale: 2,
-                    backgroundColor: '#ffffff'
-                });
-                
-                const ctx = canvas.getContext('2d');
-                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const pixels = imgData.data;
-                
-                const w = canvas.width;
-                const h = canvas.height;
-                const bytesPerRow = Math.ceil(w / 8);
-                
-                const bitmapBytes = [];
-                for (let y = 0; y < h; y++) {
-                    let bits = '';
-                    for (let x = 0; x < w; x++) {
-                        const i = (y * w + x) * 4;
-                        const brightness = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
-                        bits += brightness < 128 ? '0' : '1';
-                    }
-                    while (bits.length % 8 !== 0) bits += '1';
-                    
-                    for (let i = 0; i < bits.length; i += 8) {
-                        const byte = parseInt(bits.substring(i, i + 8), 2);
-                        bitmapBytes.push(byte);
-                    }
-                }
-                
-                let cmd = '';
-                cmd += 'SIZE 40 mm,30 mm\r\n';
-                cmd += 'GAP 2 mm,0 mm\r\n';
-                cmd += 'DIRECTION 1\r\n';
-                cmd += 'CLS\r\n';
-                cmd += `BITMAP 0,0,${bytesPerRow},${h},1,`;
-                
-                const cmdBytes = [];
-                for (let i = 0; i < cmd.length; i++) {
-                    cmdBytes.push(cmd.charCodeAt(i));
-                }
-                
-                cmdBytes.push(...bitmapBytes);
-                
-                const footer = '\r\nPRINT 1,1\r\n';
-                for (let i = 0; i < footer.length; i++) {
-                    cmdBytes.push(footer.charCodeAt(i));
-                }
-                
-                const data = new Uint8Array(cmdBytes);
-                await usbDevice.transferOut(usbEndpoint, data);
-                
-                toast('⚡ Отправлено на принтер!', 'success');
-                
-            } catch (error) {
-                console.error('Ошибка печати:', error);
-                toast('❌ Ошибка печати: ' + error.message, 'error');
+        function scrollThumbnailToActive() {
+            const activeThumb = thumbnailsWrapper.querySelector('.thumbnail-item.active');
+            if (activeThumb) {
+                activeThumb.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'});
             }
         }
         
-        async function batchPrintUSB() {
-            if (!usbDevice) {
-                toast('❌ Сначала подключи принтер!', 'error');
-                return;
-            }
-            
-            if (selectedIndices.size === 0) {
-                toast('⚠️ Выбери бирки!', 'error');
-                return;
-            }
-            
-            try {
-                const sortedEntries = Array.from(selectedIndices.entries()).sort((a, b) => a[0] - b[0]);
-                let totalPrinted = 0;
-                
-                for (const [i, quantity] of sortedEntries) {
-                    const label = filtered[i];
-                    
-                    for (let q = 0; q < quantity; q++) {
-                        const tempDiv = document.createElement('div');
-                        tempDiv.style.position = 'absolute';
-                        tempDiv.style.left = '-9999px';
-                        
-                        const pt = parseFloat(document.getElementById('s4').value);
-                        const lh = parseFloat(document.getElementById('s3').value);
-                        const f1 = parseFloat(document.getElementById('s1').value);
-                        const f2 = parseFloat(document.getElementById('s2').value);
-                        
-                        tempDiv.innerHTML = `
-                            <div class="label" style="padding-top:${pt}mm;line-height:${lh};width:40mm;height:30mm;border:2px solid #000;display:flex;flex-direction:column;justify-content:center;text-align:center;padding-left:2mm;padding-right:2mm;background:white;font-size:10pt;">
-                                <div style="font-size:${f1}pt;font-weight:${w1}">${label.line1 || ''}</div>
-                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line2 || ''}</div>
-                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line3 || ''}</div>
-                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line4 || ''}</div>
-                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line5 || ''}</div>
-                            </div>
-                        `;
-                        document.body.appendChild(tempDiv);
-                        
-                        await new Promise(resolve => setTimeout(resolve, 50));
-                        
-                        const canvas = await html2canvas(tempDiv.firstElementChild, {
-                            scale: 2,
-                            backgroundColor: '#ffffff'
-                        });
-                        
-                        const ctx = canvas.getContext('2d');
-                        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                        const pixels = imgData.data;
-                        
-                        const w = canvas.width;
-                        const h = canvas.height;
-                        const bytesPerRow = Math.ceil(w / 8);
-                        
-                        const bitmapBytes = [];
-                        for (let y = 0; y < h; y++) {
-                            let bits = '';
-                            for (let x = 0; x < w; x++) {
-                                const idx = (y * w + x) * 4;
-                                const brightness = (pixels[idx] + pixels[idx + 1] + pixels[idx + 2]) / 3;
-                                bits += brightness < 128 ? '0' : '1';
-                            }
-                            while (bits.length % 8 !== 0) bits += '1';
-                            
-                            for (let j = 0; j < bits.length; j += 8) {
-                                const byte = parseInt(bits.substring(j, j + 8), 2);
-                                bitmapBytes.push(byte);
-                            }
-                        }
-                        
-                        let cmd = '';
-                        cmd += 'SIZE 40 mm,30 mm\r\n';
-                        cmd += 'GAP 2 mm,0 mm\r\n';
-                        cmd += 'DIRECTION 1\r\n';
-                        cmd += 'CLS\r\n';
-                        cmd += `BITMAP 0,0,${bytesPerRow},${h},1,`;
-                        
-                        const cmdBytes = [];
-                        for (let j = 0; j < cmd.length; j++) {
-                            cmdBytes.push(cmd.charCodeAt(j));
-                        }
-                        
-                        cmdBytes.push(...bitmapBytes);
-                        
-                        const footer = '\r\nPRINT 1,1\r\n';
-                        for (let j = 0; j < footer.length; j++) {
-                            cmdBytes.push(footer.charCodeAt(j));
-                        }
-                        
-                        const data = new Uint8Array(cmdBytes);
-                        await usbDevice.transferOut(usbEndpoint, data);
-                        
-                        document.body.removeChild(tempDiv);
-                        totalPrinted++;
-                        await new Promise(resolve => setTimeout(resolve, 300));
-                    }
-                }
-                
-                toast(`⚡ Напечатано ${totalPrinted} бирок!`, 'success');
-                
-            } catch (error) {
-                console.error('Ошибка печати:', error);
-                toast('❌ Ошибка печати: ' + error.message, 'error');
+        function updateActiveThumbnail() {
+            thumbnailsWrapper.querySelectorAll('.thumbnail-item').forEach(thumb => {
+                thumb.classList.toggle('active', parseInt(thumb.dataset.page) === pageNum);
+            });
+            scrollThumbnailToActive();
+        }
+        
+        function goToPage(num) {
+            if (num > 0 && num <= pdfDoc.numPages && num !== pageNum) {
+                pageNum = num;
+                queueRenderPage(pageNum);
+                updateActiveThumbnail();
+                showThumbnails();
+                showPageIndicator(num);
             }
         }
-
-        async function exportPNG() {
-            if (idx < 0) return;
+        
+        function showPageIndicator(num) {
+            pageIndicator.textContent = num;
+            pageIndicator.classList.add('visible');
+            setTimeout(() => pageIndicator.classList.remove('visible'), 600);
+        }
+        
+        async function openPageSelector() {
+            selectedPages.clear();
+            pageSelectorGrid.innerHTML = '';
+            extractSelectedBtn.disabled = true;
+            pageSelectorCount.textContent = 'Выбрано: 0';
+            
+            pageSelectorOverlay.classList.add('active');
+            
+            for (let i = 1; i <= pdfDoc.numPages; i++) {
+                await renderSelectorThumbnail(i);
+                if (i % 10 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                }
+            }
+        }
+        
+        async function renderSelectorThumbnail(i) {
+            const page = await pdfDoc.getPage(i);
+            const viewport = page.getViewport({scale: 0.5});
+            
+            const selectorCanvas = document.createElement('canvas');
+            selectorCanvas.className = 'page-selector-canvas';
+            selectorCanvas.width = viewport.width;
+            selectorCanvas.height = viewport.height;
+            
+            const selectorCtx = selectorCanvas.getContext('2d');
+            await page.render({
+                canvasContext: selectorCtx,
+                viewport: viewport
+            }).promise;
+            
+            const selectorItem = document.createElement('div');
+            selectorItem.className = 'page-selector-item';
+            selectorItem.dataset.page = i;
+            
+            const checkbox = document.createElement('div');
+            checkbox.className = 'page-selector-checkbox';
+            
+            const label = document.createElement('div');
+            label.className = 'page-selector-label';
+            label.textContent = `Стр. ${i}`;
+            
+            selectorItem.appendChild(selectorCanvas);
+            selectorItem.appendChild(checkbox);
+            selectorItem.appendChild(label);
+            
+            selectorItem.addEventListener('click', () => togglePageSelection(i, selectorItem));
+            
+            pageSelectorGrid.appendChild(selectorItem);
+        }
+        
+        function togglePageSelection(pageNum, element) {
+            if (selectedPages.has(pageNum)) {
+                selectedPages.delete(pageNum);
+                element.classList.remove('selected');
+            } else {
+                selectedPages.add(pageNum);
+                element.classList.add('selected');
+            }
+            
+            pageSelectorCount.textContent = `Выбрано: ${selectedPages.size}`;
+            extractSelectedBtn.disabled = selectedPages.size === 0;
+        }
+        
+        function closePageSelector() {
+            pageSelectorOverlay.classList.remove('active');
+            setTimeout(() => {
+                selectedPages.clear();
+            }, 300);
+        }
+        
+        async function extractSelectedPages() {
+            if (selectedPages.size === 0) {
+                showStatus('Выберите хотя бы одну страницу');
+                return;
+            }
+            
+            if (!pdfArrayBuffer) {
+                showStatus('❌ PDF не загружен в память');
+                console.error('pdfArrayBuffer is null');
+                return;
+            }
             
             try {
-                const canvas = await html2canvas(document.getElementById('preview'), {
-                    scale: 4,
-                    backgroundColor: '#ffffff',
-                    width: 151,
-                    height: 113
-                });
+                console.log('Начало извлечения страниц:', Array.from(selectedPages));
+                const pageIndices = Array.from(selectedPages).sort((a, b) => a - b).map(p => p - 1);
                 
-                const l = document.getElementById('l1').value;
+                const srcDoc = await PDFLib.PDFDocument.load(pdfArrayBuffer);
+                const newDoc = await PDFLib.PDFDocument.create();
+                
+                for (const pageIndex of pageIndices) {
+                    const [copiedPage] = await newDoc.copyPages(srcDoc, [pageIndex]);
+                    newDoc.addPage(copiedPage);
+                }
+                
+                const pdfBytes = await newDoc.save();
+                const blob = new Blob([pdfBytes], {type: 'application/pdf'});
+                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = canvas.toDataURL('image/png');
-                a.download = `emil_birka_${l.replace(/[^a-zA-Z0-9]/g,'_')}.png`;
+                a.href = url;
+                a.download = `извлечённые_${selectedPages.size}_стр.pdf`;
+                document.body.appendChild(a);
                 a.click();
-                toast('🖼️ PNG сохранён!', 'success');
-            } catch(e) {
-                console.error('Ошибка PNG:', e);
-                toast('❌ Ошибка экспорта PNG', 'error');
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showStatus(`✓ Извлечено: ${selectedPages.size} стр.!`);
+                closePageSelector();
+            } catch (error) {
+                console.error('Ошибка извлечения:', error);
+                showStatus('❌ Ошибка: ' + error.message);
             }
         }
-
-        async function batchPNG() {
-            if (selectedIndices.size === 0) {
-                toast('⚠️ Выбери бирки!', 'error');
+        
+        async function extractByNumbers() {
+            const rangeStr = document.getElementById('pageRange').value.trim();
+            if (!rangeStr) {
+                showStatus('Укажите номера страниц');
                 return;
             }
-
-            try {
-                const sortedEntries = Array.from(selectedIndices.entries()).sort((a, b) => a[0] - b[0]);
-                
-                for (const [i, quantity] of sortedEntries) {
-                    const label = filtered[i];
-                    
-                    for (let q = 0; q < quantity; q++) {
-                        const tempDiv = document.createElement('div');
-                        tempDiv.style.position = 'absolute';
-                        tempDiv.style.left = '-9999px';
-                        
-                        const pt = parseFloat(document.getElementById('s4').value);
-                        const lh = parseFloat(document.getElementById('s3').value);
-                        const f1 = parseFloat(document.getElementById('s1').value);
-                        const f2 = parseFloat(document.getElementById('s2').value);
-                        
-                        tempDiv.innerHTML = `
-                            <div class="label" style="padding-top:${pt}mm;line-height:${lh};width:40mm;height:30mm;border:2px solid #000;display:flex;flex-direction:column;justify-content:center;text-align:center;padding-left:2mm;padding-right:2mm;background:white;font-size:10pt;">
-                                <div style="font-size:${f1}pt;font-weight:${w1}">${label.line1 || ''}</div>
-                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line2 || ''}</div>
-                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line3 || ''}</div>
-                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line4 || ''}</div>
-                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line5 || ''}</div>
-                            </div>
-                        `;
-                        document.body.appendChild(tempDiv);
-                        
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                        
-                        const canvas = await html2canvas(tempDiv.firstElementChild, {
-                            scale: 4,
-                            backgroundColor: '#ffffff'
-                        });
-                        
-                        const a = document.createElement('a');
-                        const filename = (label.line1 || 'birka').replace(/[^a-zA-Z0-9]/g, '_');
-                        a.href = canvas.toDataURL('image/png');
-                        a.download = `emil_${filename}_${q+1}.png`;
-                        a.click();
-                        
-                        document.body.removeChild(tempDiv);
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                    }
-                }
-                
-                const totalQty = Array.from(selectedIndices.values()).reduce((sum, qty) => sum + qty, 0);
-                toast(`🖼️ Создано ${totalQty} PNG файлов!`, 'success');
-                
-            } catch(e) {
-                console.error('Ошибка PNG:', e);
-                toast('❌ Ошибка экспорта PNG', 'error');
+            
+            if (!pdfArrayBuffer) {
+                showStatus('❌ PDF не загружен в память');
+                return;
             }
-        }
-
-        async function exportPDF() {
-            if (idx < 0) return;
             
             try {
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF({
-                    orientation: 'landscape',
-                    unit: 'mm',
-                    format: [40, 30]
-                });
-
-                const canvas = await html2canvas(document.getElementById('preview'), {
-                    scale: 4,
-                    backgroundColor: '#ffffff'
-                });
-
-                const imgData = canvas.toDataURL('image/png');
-                pdf.addImage(imgData, 'PNG', 0, 0, 40, 30);
+                const pageIndices = parsePageRange(rangeStr, pdfDoc.numPages);
+                if (pageIndices.length === 0) {
+                    showStatus('Неверный формат');
+                    return;
+                }
                 
-                const l = document.getElementById('l1').value;
-                pdf.save(`emil_birka_${l.replace(/[^a-zA-Z0-9]/g,'_')}.pdf`);
-                toast('📄 PDF сохранён!', 'success');
-            } catch(e) {
-                console.error('Ошибка PDF:', e);
-                toast('❌ Ошибка экспорта PDF', 'error');
+                const srcDoc = await PDFLib.PDFDocument.load(pdfArrayBuffer);
+                const newDoc = await PDFLib.PDFDocument.create();
+                
+                for (const pageIndex of pageIndices) {
+                    const [copiedPage] = await newDoc.copyPages(srcDoc, [pageIndex]);
+                    newDoc.addPage(copiedPage);
+                }
+                
+                const pdfBytes = await newDoc.save();
+                const blob = new Blob([pdfBytes], {type: 'application/pdf'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'извлечённые_страницы.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showStatus(`✓ Извлечено: ${pageIndices.length} стр.!`);
+            } catch (error) {
+                console.error('Ошибка извлечения:', error);
+                showStatus('❌ Ошибка: ' + error.message);
             }
         }
-
-        async function batchPDF() {
-            if (selectedIndices.size === 0) {
-                toast('⚠️ Выбери бирки!', 'error');
-                return;
-            }
-
-            try {
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF({
-                    orientation: 'landscape',
-                    unit: 'mm',
-                    format: [40, 30]
-                });
-
-                const f1 = parseFloat(document.getElementById('s1').value);
-                const f2 = parseFloat(document.getElementById('s2').value);
-                const lh = parseFloat(document.getElementById('s3').value);
-                const pt = parseFloat(document.getElementById('s4').value);
-
-                let isFirst = true;
-                const sortedEntries = Array.from(selectedIndices.entries()).sort((a, b) => a[0] - b[0]);
-
-                for (const [i, quantity] of sortedEntries) {
-                    const label = filtered[i];
-                    
-                    for (let q = 0; q < quantity; q++) {
-                        if (!isFirst) {
-                            pdf.addPage();
+        
+        function parsePageRange(rangeStr, maxPages) {
+            const indices = new Set();
+            rangeStr.split(',').forEach(part => {
+                const trimmed = part.trim();
+                if (trimmed.includes('-')) {
+                    const [start, end] = trimmed.split('-').map(s => parseInt(s.trim()));
+                    if (!isNaN(start) && !isNaN(end)) {
+                        for (let i = start; i <= end && i <= maxPages; i++) {
+                            if (i >= 1) indices.add(i - 1);
                         }
-                        isFirst = false;
-
-                        const tempDiv = document.createElement('div');
-                        tempDiv.style.position = 'absolute';
-                        tempDiv.style.left = '-9999px';
-                        
-                        tempDiv.innerHTML = `
-                            <div class="label" style="padding-top:${pt}mm;line-height:${lh};width:40mm;height:30mm;border:2px solid #000;display:flex;flex-direction:column;justify-content:center;text-align:center;padding-left:2mm;padding-right:2mm;background:white;font-size:10pt;">
-                                <div style="font-size:${f1}pt;font-weight:${w1}">${label.line1 || ''}</div>
-                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line2 || ''}</div>
-                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line3 || ''}</div>
-                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line4 || ''}</div>
-                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line5 || ''}</div>
-                            </div>
-                        `;
-                        document.body.appendChild(tempDiv);
-
-                        await new Promise(resolve => setTimeout(resolve, 50));
-
-                        const canvas = await html2canvas(tempDiv.firstElementChild, {
-                            scale: 4,
-                            backgroundColor: '#ffffff'
-                        });
-
-                        const imgData = canvas.toDataURL('image/png');
-                        pdf.addImage(imgData, 'PNG', 0, 0, 40, 30);
-
-                        document.body.removeChild(tempDiv);
+                    }
+                } else {
+                    const num = parseInt(trimmed);
+                    if (!isNaN(num) && num >= 1 && num <= maxPages) {
+                        indices.add(num - 1);
                     }
                 }
-
-                const totalQty = Array.from(selectedIndices.values()).reduce((sum, qty) => sum + qty, 0);
-                pdf.save(`emil_birki_${totalQty}_${new Date().toISOString().slice(0,10)}.pdf`);
-                toast(`📄 PDF создан: ${totalQty} бирок!`, 'success');
-            } catch(e) {
-                console.error('Ошибка PDF:', e);
-                toast('❌ Ошибка создания PDF', 'error');
-            }
-        }
-
-        function printSingle() {
-            if (idx < 0) return;
-            
-            const f1 = parseFloat(document.getElementById('s1').value);
-            const f2 = parseFloat(document.getElementById('s2').value);
-            const lh = parseFloat(document.getElementById('s3').value);
-            const pt = parseFloat(document.getElementById('s4').value);
-            
-            const label = filtered[idx];
-            const html = getLabelHTML(label, f1, f2, lh, pt);
-            
-            document.getElementById('printArea').innerHTML = html;
-            setTimeout(() => {
-                window.print();
-                toast('🖨️ Отправлено на печать!', 'success');
-            }, 300);
-        }
-
-        function getLabelHTML(label, f1, f2, lh, pt) {
-            const lines = [
-                `<div style="font-size:${f1}pt;font-weight:${w1}">${label.line1 || ''}</div>`,
-                `<div style="font-size:${f2}pt;font-weight:${w2}">${label.line2 || ''}</div>`,
-                `<div style="font-size:${f2}pt;font-weight:${w2}">${label.line3 || ''}</div>`,
-                `<div style="font-size:${f2}pt;font-weight:${w2}">${label.line4 || ''}</div>`,
-                `<div style="font-size:${f2}pt;font-weight:${w2}">${label.line5 || ''}</div>`
-            ];
-            
-            return `<div class="print-label" style="padding-top:${pt}mm;line-height:${lh}">${lines.join('')}</div>`;
+            });
+            return Array.from(indices).sort((a, b) => a - b);
         }
         
-        function batchPrint() {
-            if (selectedIndices.size === 0) {
-                toast('⚠️ Выбери бирки!', 'error');
+        function saveState() {
+            try {
+                localStorage.setItem('emilPdfState', JSON.stringify({
+                    pageNum: pageNum,
+                    displayScale: displayScale,
+                    overlap: document.getElementById('overlap').value
+                }));
+            } catch (e) {}
+        }
+        
+        function loadState() {
+            try {
+                const state = JSON.parse(localStorage.getItem('emilPdfState'));
+                if (state && state.overlap) {
+                    document.getElementById('overlap').value = state.overlap;
+                }
+                return state;
+            } catch (e) {}
+            return null;
+        }
+        
+        function savePDFToIndexedDB(arrayBuffer) {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('EmilPDFDB', 1);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    const db = request.result;
+                    const transaction = db.transaction(['pdfs'], 'readwrite');
+                    const store = transaction.objectStore('pdfs');
+                    store.put({ id: 'current', data: arrayBuffer, timestamp: Date.now() });
+                    transaction.oncomplete = () => resolve();
+                    transaction.onerror = () => reject(transaction.error);
+                };
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('pdfs')) {
+                        db.createObjectStore('pdfs', { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+        
+        function loadPDFFromIndexedDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('EmilPDFDB', 1);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    const db = request.result;
+                    const transaction = db.transaction(['pdfs'], 'readonly');
+                    const store = transaction.objectStore('pdfs');
+                    const getRequest = store.get('current');
+                    getRequest.onsuccess = () => resolve(getRequest.result);
+                    getRequest.onerror = () => reject(getRequest.error);
+                };
+            });
+        }
+        
+        function getEventCoordinates(e) {
+            if (e.touches && e.touches.length > 0) {
+                return {
+                    clientX: e.touches[0].clientX,
+                    clientY: e.touches[0].clientY
+                };
+            }
+            return {
+                clientX: e.clientX,
+                clientY: e.clientY
+            };
+        }
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                loadPDF(file);
+            }
+        });
+        
+        async function loadPDF(file) {
+            progressBar.classList.add('active');
+            
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                
+                pdfArrayBuffer = arrayBuffer;
+                console.log('PDF сохранён в память, размер:', arrayBuffer.byteLength);
+                
+                await savePDFToIndexedDB(arrayBuffer);
+                
+                const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
+                pdfDoc = await loadingTask.promise;
+                
+                progressBar.style.width = '100%';
+                setTimeout(() => progressBar.classList.remove('active'), 500);
+                
+                document.getElementById('pageCount').textContent = pdfDoc.numPages;
+                document.getElementById('pageNum').max = pdfDoc.numPages;
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('canvasContainer').style.display = 'block';
+                document.getElementById('dimensionInfo').classList.add('visible');
+                
+                ['cropBtn', 'printBtn', 'resetBtn', 'tileBtn', 'extractBtn', 'fitBtn', 'extractVisualBtn'].forEach(id => {
+                    document.getElementById(id).disabled = false;
+                });
+                
+                const savedState = loadState();
+                if (savedState && savedState.pageNum && savedState.pageNum <= pdfDoc.numPages) {
+                    pageNum = savedState.pageNum;
+                    displayScale = savedState.displayScale || displayScale;
+                    highResScale = displayScale * 2;
+                }
+                
+                await renderPage(pageNum);
+                await generateThumbnails();
+                fitToWidth();
+                
+                showStatus('✓ PDF загружен' + (hasGPU ? ' с GPU!' : '!'));
+                
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                showStatus('❌ Ошибка загрузки PDF');
+                progressBar.classList.remove('active');
+            }
+        }
+        
+        async function renderPage(num, callback) {
+            pageRendering = true;
+            
+            currentPage = await pdfDoc.getPage(num);
+            
+            const displayViewport = currentPage.getViewport({scale: displayScale});
+            canvas.height = displayViewport.height;
+            canvas.width = displayViewport.width;
+            
+            const renderContext = {
+                canvasContext: ctx,
+                viewport: displayViewport,
+                intent: 'display',
+                enableWebGL: useWebGL,
+                renderInteractiveForms: false
+            };
+            
+            await currentPage.render(renderContext).promise;
+            
+            const highResViewport = currentPage.getViewport({scale: highResScale});
+            hiddenCanvas.height = highResViewport.height;
+            hiddenCanvas.width = highResViewport.width;
+            
+            await currentPage.render({
+                canvasContext: hiddenCtx,
+                viewport: highResViewport
+            }).promise;
+            
+            pageRendering = false;
+            if (pageNumPending !== null) {
+                renderPage(pageNumPending);
+                pageNumPending = null;
+            }
+            
+            document.getElementById('pageNum').value = num;
+            updateDimensionInfo();
+            resetSelection();
+            resetZoom();
+            saveState();
+            
+            if (callback) callback();
+        }
+        
+        function queueRenderPage(num, callback) {
+            if (pageRendering) {
+                pageNumPending = num;
+            } else {
+                renderPage(num, callback);
+            }
+        }
+        
+        function prevPage() {
+            if (pageNum <= 1) return;
+            pageNum--;
+            queueRenderPage(pageNum);
+            updateActiveThumbnail();
+            showThumbnails();
+            showPageIndicator(pageNum);
+        }
+        
+        function nextPage() {
+            if (pageNum >= pdfDoc.numPages) return;
+            pageNum++;
+            queueRenderPage(pageNum);
+            updateActiveThumbnail();
+            showThumbnails();
+            showPageIndicator(pageNum);
+        }
+        
+        document.getElementById('pageNum').addEventListener('change', (e) => {
+            let val = parseInt(e.target.value);
+            if (val > 0 && val <= pdfDoc.numPages) {
+                pageNum = val;
+                queueRenderPage(pageNum);
+                updateActiveThumbnail();
+                showThumbnails();
+                showPageIndicator(pageNum);
+            }
+        });
+        
+        document.getElementById('fitBtn').addEventListener('click', fitToWidth);
+        
+        function fitToWidth() {
+            if (!currentPage) return;
+            const containerWidth = canvasArea.clientWidth - 80;
+            const viewport = currentPage.getViewport({scale: 1});
+            displayScale = containerWidth / viewport.width;
+            highResScale = displayScale * 2;
+            queueRenderPage(pageNum);
+        }
+        
+        function updateDimensionInfo() {
+            if (!currentPage) return;
+            const viewport = currentPage.getViewport({scale: 1});
+            const widthMM = Math.round(viewport.width * 25.4 / 72);
+            const heightMM = Math.round(viewport.height * 25.4 / 72);
+            document.getElementById('pageDimensions').textContent = `${widthMM} × ${heightMM} мм`;
+        }
+        
+        // СВАЙП ДЛЯ ПЕРЕКЛЮЧЕНИЯ СТРАНИЦ - 15%
+        canvasContainer.addEventListener('touchstart', (e) => {
+            if (e.touches.length !== 1 || isDrawing || isMoving || isResizing) return;
+            
+            swipeStartX = e.touches[0].clientX;
+            swipeStartY = e.touches[0].clientY;
+            isSwiping = false;
+            isHorizontalSwipe = false;
+            swipeDelta = 0;
+        }, { passive: true });
+        
+        canvasContainer.addEventListener('touchmove', (e) => {
+            if (e.touches.length !== 1 || isDrawing || isMoving || isResizing) return;
+            
+            const deltaX = e.touches[0].clientX - swipeStartX;
+            const deltaY = e.touches[0].clientY - swipeStartY;
+            
+            if (!isSwiping && (Math.abs(deltaX) > 15 || Math.abs(deltaY) > 15)) {
+                isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY) * 1.5;
+                isSwiping = true;
+            }
+            
+            if (isSwiping && isHorizontalSwipe) {
+                e.preventDefault();
+                swipeDelta = deltaX;
+                canvasContainer.classList.add('swiping');
+                canvasContainer.style.transform = `translateX(${swipeDelta}px)`;
+            }
+        }, { passive: false });
+        
+        canvasContainer.addEventListener('touchend', (e) => {
+            if (!isSwiping || !isHorizontalSwipe) return;
+            
+            const screenWidth = window.innerWidth;
+            const threshold = screenWidth * SWIPE_THRESHOLD_PERCENT;
+            
+            canvasContainer.classList.remove('swiping');
+            
+            if (Math.abs(swipeDelta) > threshold) {
+                if (swipeDelta > 0 && pageNum > 1) {
+                    canvasContainer.style.transform = `translateX(${screenWidth}px)`;
+                    setTimeout(() => {
+                        prevPage();
+                        canvasContainer.style.transform = '';
+                    }, 150);
+                } else if (swipeDelta < 0 && pageNum < pdfDoc.numPages) {
+                    canvasContainer.style.transform = `translateX(-${screenWidth}px)`;
+                    setTimeout(() => {
+                        nextPage();
+                        canvasContainer.style.transform = '';
+                    }, 150);
+                } else {
+                    canvasContainer.style.transform = '';
+                }
+            } else {
+                canvasContainer.style.transform = '';
+            }
+            
+            isSwiping = false;
+            isHorizontalSwipe = false;
+            swipeDelta = 0;
+        });
+        
+        function showLongPressHint(x, y) {
+            longPressHint.style.left = (x + 10) + 'px';
+            longPressHint.style.top = (y - 40) + 'px';
+            longPressHint.classList.add('visible');
+        }
+        
+        function hideLongPressHint() {
+            longPressHint.classList.remove('visible');
+        }
+        
+        function cancelLongPress() {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            hideLongPressHint();
+            isLongPress = false;
+        }
+        
+        canvasWrapper.addEventListener('mousedown', handleStart);
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('mouseup', handleEnd);
+        
+        canvasWrapper.addEventListener('touchstart', handleStart, { passive: false });
+        document.addEventListener('touchmove', handleMove, { passive: false });
+        document.addEventListener('touchend', handleEnd);
+        
+        function handleStart(e) {
+            if (!pdfDoc) return;
+            if (e.touches && e.touches.length > 1) return;
+            if (isSwiping) return;
+            
+            const coords = getEventCoordinates(e);
+            const rect = canvas.getBoundingClientRect();
+            const x = (coords.clientX - rect.left) / currentScale;
+            const y = (coords.clientY - rect.top) / currentScale;
+            
+            if (e.target.classList.contains('selection-handle')) {
+                e.preventDefault();
+                isResizing = true;
+                resizeHandle = e.target.dataset.handle;
+                initialSelection = {...selection};
+                startX = x;
+                startY = y;
                 return;
             }
-
-            const f1 = parseFloat(document.getElementById('s1').value);
-            const f2 = parseFloat(document.getElementById('s2').value);
-            const lh = parseFloat(document.getElementById('s3').value);
-            const pt = parseFloat(document.getElementById('s4').value);
             
-            const htmlParts = [];
-            const sortedEntries = Array.from(selectedIndices.entries()).sort((a, b) => a[0] - b[0]);
+            if (e.target === selectionBody && selection) {
+                e.preventDefault();
+                isMoving = true;
+                offsetX = x - selection.x;
+                offsetY = y - selection.y;
+                return;
+            }
             
-            sortedEntries.forEach(([i, quantity]) => {
-                const label = filtered[i];
-                for (let q = 0; q < quantity; q++) {
-                    htmlParts.push(getLabelHTML(label, f1, f2, lh, pt));
-                }
-            });
-
-            document.getElementById('printArea').innerHTML = htmlParts.join('');
-            setTimeout(() => {
-                window.print();
-                const totalQty = Array.from(selectedIndices.values()).reduce((sum, qty) => sum + qty, 0);
-                toast(`🖨️ ${totalQty} бирок отправлены на печать!`, 'success');
-            }, 300);
-        }
-
-        function importLabels() {
-            const text = document.getElementById('import').value;
-            const blocks = text.trim().split('\n\n');
-            let imported = 0;
+            longPressStartX = coords.clientX;
+            longPressStartY = coords.clientY;
             
-            blocks.forEach(block => {
-                const lines = block.trim().split('\n').map(l => l.trim()).filter(l => l);
-                if (lines.length >= 5) {
-                    const groupName = lines[0];
-                    labels.push({
-                        line1: groupName,
-                        line2: lines[1],
-                        line3: lines[2],
-                        line4: lines[3] || autoFillFromShield(groupName),
-                        line5: lines[4]
-                    });
-                    imported++;
-                }
-            });
-            
-            if (imported > 0) {
-                saveToStorage();
-                updateStats();
-                applySearch();
-                document.getElementById('import').value = '';
-                toast(`✅ Импортировано ${imported} бирок!`, 'success');
+            if (e.type === 'touchstart') {
+                longPressTimer = setTimeout(() => {
+                    isLongPress = true;
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    startDrawing(x, y);
+                }, LONG_PRESS_DURATION);
+                showLongPressHint(coords.clientX, coords.clientY);
             } else {
-                toast('⚠️ Не найдено корректных бирок', 'error');
+                e.preventDefault();
+                isLongPress = true;
+                startDrawing(x, y);
             }
         }
-
-        // Event listeners
-        document.getElementById('search').addEventListener('input', applySearch);
-        document.getElementById('tabList').addEventListener('click', () => showTab(0));
-        document.getElementById('tabEditor').addEventListener('click', () => showTab(1));
-        document.getElementById('tabManage').addEventListener('click', () => showTab(2));
-
-        document.querySelectorAll('.slider').forEach(s => {
-            s.addEventListener('input', updatePreview);
+        
+        function startDrawing(x, y) {
+            isDrawing = true;
+            startX = x;
+            startY = y;
+            selection = null;
+            selectionOverlay.style.display = 'none';
+            selectionOverlay.classList.remove('active');
+            hideLongPressHint();
+        }
+        
+        function handleMove(e) {
+            if (!pdfDoc) return;
+            if (e.touches && e.touches.length > 1) {
+                cancelLongPress();
+                return;
+            }
+            
+            const coords = getEventCoordinates(e);
+            
+            if (longPressTimer && e.type === 'touchmove') {
+                const dx = coords.clientX - longPressStartX;
+                const dy = coords.clientY - longPressStartY;
+                if (Math.sqrt(dx*dx + dy*dy) > MOVE_THRESHOLD) {
+                    cancelLongPress();
+                    return;
+                }
+            }
+            
+            if (!isDrawing && !isMoving && !isResizing) return;
+            e.preventDefault();
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = (coords.clientX - rect.left) / currentScale;
+            const y = (coords.clientY - rect.top) / currentScale;
+            
+            if (isDrawing) {
+                const width = x - startX;
+                const height = y - startY;
+                selection = {
+                    x: width > 0 ? startX : x,
+                    y: height > 0 ? startY : y,
+                    width: Math.abs(width),
+                    height: Math.abs(height)
+                };
+                updateSelectionOverlay();
+            } else if (isMoving) {
+                let newX = x - offsetX;
+                let newY = y - offsetY;
+                newX = Math.max(0, Math.min(newX, canvas.width - selection.width));
+                newY = Math.max(0, Math.min(newY, canvas.height - selection.height));
+                selection.x = newX;
+                selection.y = newY;
+                updateSelectionOverlay();
+            } else if (isResizing) {
+                const deltaX = x - startX;
+                const deltaY = y - startY;
+                let newSelection = {...initialSelection};
+                
+                switch(resizeHandle) {
+                    case 'tl': newSelection.x += deltaX; newSelection.y += deltaY; newSelection.width -= deltaX; newSelection.height -= deltaY; break;
+                    case 'tr': newSelection.y += deltaY; newSelection.width += deltaX; newSelection.height -= deltaY; break;
+                    case 'bl': newSelection.x += deltaX; newSelection.width -= deltaX; newSelection.height += deltaY; break;
+                    case 'br': newSelection.width += deltaX; newSelection.height += deltaY; break;
+                    case 't': newSelection.y += deltaY; newSelection.height -= deltaY; break;
+                    case 'b': newSelection.height += deltaY; break;
+                    case 'l': newSelection.x += deltaX; newSelection.width -= deltaX; break;
+                    case 'r': newSelection.width += deltaX; break;
+                }
+                
+                if (newSelection.width >= 20 && newSelection.height >= 20 &&
+                    newSelection.x >= 0 && newSelection.x + newSelection.width <= canvas.width &&
+                    newSelection.y >= 0 && newSelection.y + newSelection.height <= canvas.height) {
+                    selection = newSelection;
+                }
+                updateSelectionOverlay();
+            }
+        }
+        
+        function handleEnd(e) {
+            cancelLongPress();
+            if (isDrawing && selection && selection.width > 10 && selection.height > 10) {
+                selectionOverlay.classList.add('active');
+            }
+            isDrawing = false;
+            isMoving = false;
+            isResizing = false;
+            resizeHandle = null;
+            initialSelection = null;
+        }
+        
+        function updateSelectionOverlay() {
+            if (!selection) return;
+            selectionOverlay.style.left = selection.x + 'px';
+            selectionOverlay.style.top = selection.y + 'px';
+            selectionOverlay.style.width = selection.width + 'px';
+            selectionOverlay.style.height = selection.height + 'px';
+            selectionOverlay.style.display = 'block';
+            
+            const widthMM = Math.round(selection.width / displayScale * 25.4 / 72);
+            const heightMM = Math.round(selection.height / displayScale * 25.4 / 72);
+            selectionInfo.textContent = `${Math.round(selection.width)} × ${Math.round(selection.height)} px (${widthMM} × ${heightMM} мм)`;
+        }
+        
+        function resetSelection() {
+            selection = null;
+            selectionOverlay.style.display = 'none';
+            selectionOverlay.classList.remove('active');
+        }
+        
+        document.getElementById('cropBtn').addEventListener('click', async () => {
+            if (!selection || selection.width < 10 || selection.height < 10) {
+                showStatus('Сначала выделите область');
+                return;
+            }
+            
+            try {
+                const scaleRatio = highResScale / displayScale;
+                const highResSelection = {
+                    x: selection.x * scaleRatio,
+                    y: selection.y * scaleRatio,
+                    width: selection.width * scaleRatio,
+                    height: selection.height * scaleRatio
+                };
+                
+                const imageData = hiddenCtx.getImageData(
+                    highResSelection.x, highResSelection.y, 
+                    highResSelection.width, highResSelection.height
+                );
+                
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = highResSelection.width;
+                tempCanvas.height = highResSelection.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.putImageData(imageData, 0, 0);
+                
+                const { jsPDF } = window.jspdf;
+                const widthPt = highResSelection.width * 72 / (highResScale * 72);
+                const heightPt = highResSelection.height * 72 / (highResScale * 72);
+                
+                const pdf = new jsPDF({
+                    orientation: highResSelection.width > highResSelection.height ? 'landscape' : 'portrait',
+                    unit: 'pt',
+                    format: [widthPt, heightPt]
+                });
+                
+                const imgData = tempCanvas.toDataURL('image/jpeg', 1.0);
+                pdf.addImage(imgData, 'JPEG', 0, 0, widthPt, heightPt, undefined, 'FAST');
+                pdf.save(`бирка_стр${pageNum}.pdf`);
+                showStatus('✓ Область сохранена!');
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showStatus('❌ Ошибка сохранения');
+            }
         });
         
-        document.querySelectorAll('.toggle').forEach(t => {
-            t.querySelectorAll('button').forEach(b => {
-                b.addEventListener('click', function() {
-                    const parent = this.parentElement;
-                    const toggle = parent.id === 'toggle1' ? 1 : 2;
-                    const weight = this.dataset.weight;
-                    if (toggle === 1) w1 = weight;
-                    else w2 = weight;
-                    parent.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    updatePreview();
-                });
-            });
-        });
-
-        document.querySelectorAll('input[type="text"]').forEach(input => {
-            input.addEventListener('input', updatePreview);
-        });
-
-        document.getElementById('saveBtn').addEventListener('click', function() {
-            if (idx < 0) return;
-            filtered[idx].line1 = document.getElementById('l1').value;
-            filtered[idx].line2 = document.getElementById('l2').value;
-            filtered[idx].line3 = document.getElementById('l3').value;
-            filtered[idx].line4 = document.getElementById('l4').value;
-            filtered[idx].line5 = document.getElementById('l5').value;
-            
-            const realIdx = labels.indexOf(filtered[idx]);
-            if (realIdx >= 0) {
-                labels[realIdx] = filtered[idx];
+        document.getElementById('printBtn').addEventListener('click', () => {
+            if (!selection || selection.width < 10 || selection.height < 10) {
+                showStatus('Сначала выделите область');
+                return;
             }
             
-            saveToStorage();
-            toast('💾 Бирка сохранена!', 'success');
+            try {
+                const scaleRatio = highResScale / displayScale;
+                const highResSelection = {
+                    x: selection.x * scaleRatio,
+                    y: selection.y * scaleRatio,
+                    width: selection.width * scaleRatio,
+                    height: selection.height * scaleRatio
+                };
+                
+                const imageData = hiddenCtx.getImageData(
+                    highResSelection.x, highResSelection.y, 
+                    highResSelection.width, highResSelection.height
+                );
+                
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = highResSelection.width;
+                tempCanvas.height = highResSelection.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.putImageData(imageData, 0, 0);
+                
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write('<html><head><title>Печать</title>');
+                printWindow.document.write('<style>body{margin:0;display:flex;align-items:center;justify-content:center;}img{max-width:100%;height:auto;}@media print{body{margin:0;}}</style>');
+                printWindow.document.write('</head><body>');
+                printWindow.document.write(`<img src="${tempCanvas.toDataURL('image/jpeg', 1.0)}" />`);
+                printWindow.document.write('<script>window.onload = function(){ setTimeout(function(){ window.print(); }, 500); };<\/script>');
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                
+                showStatus('✓ Отправлено на печать');
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showStatus('❌ Ошибка печати');
+            }
         });
-
-        document.getElementById('usbConnectBtn').addEventListener('click', connectUSB);
-        document.getElementById('usbPrintBtn').addEventListener('click', printUSB);
-        document.getElementById('batchUsbBtn').addEventListener('click', batchPrintUSB);
-        document.getElementById('printBtn').addEventListener('click', printSingle);
-        document.getElementById('batchPrintBtn').addEventListener('click', batchPrint);
-        document.getElementById('pngBtn').addEventListener('click', exportPNG);
-        document.getElementById('batchPngBtn').addEventListener('click', batchPNG);
-        document.getElementById('pdfBtn').addEventListener('click', exportPDF);
-        document.getElementById('batchPdfBtn').addEventListener('click', batchPDF);
-        document.getElementById('fixBtn').addEventListener('click', fixLabels);
-        document.getElementById('loadFileBtn').addEventListener('click', loadFromFile);
-        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
-        document.getElementById('saveFileBtn').addEventListener('click', saveToFile);
-        document.getElementById('importBtn').addEventListener('click', importLabels);
-        document.getElementById('clearSelectionBtn').addEventListener('click', clearSelection);
-
-        // Initialize
-        loadFromStorage();
-        updateStats();
-        render();
+        
+        document.getElementById('resetBtn').addEventListener('click', resetSelection);
+        
+        document.getElementById('tileBtn').addEventListener('click', () => {
+            updateOverlapDisplay();
+            document.getElementById('formatModal').classList.add('active');
+        });
+        
+        function selectFormat(format) {
+            selectedFormat = format;
+            document.querySelectorAll('.format-option').forEach(el => el.classList.remove('selected'));
+            document.querySelector(`[data-format="${format}"]`).classList.add('selected');
+        }
+        
+        function closeFormatModal() {
+            document.getElementById('formatModal').classList.remove('active');
+        }
+        
+        function updateOverlapDisplay() {
+            document.getElementById('overlapDisplay').textContent = document.getElementById('overlap').value;
+            saveState();
+        }
+        
+        async function confirmTiling() {
+            closeFormatModal();
+            showStatus('Разделение...');
+            
+            try {
+                const viewport = currentPage.getViewport({scale: 1});
+                const pageWidthMM = viewport.width * 25.4 / 72;
+                const pageHeightMM = viewport.height * 25.4 / 72;
+                
+                const format = paperFormats[selectedFormat];
+                const overlapMM = parseFloat(document.getElementById('overlap').value);
+                
+                const tileWidth = format.width - overlapMM;
+                const tileHeight = format.height - overlapMM;
+                
+                const cols = Math.ceil(pageWidthMM / tileWidth);
+                const rows = Math.ceil(pageHeightMM / tileHeight);
+                
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: format.width > format.height ? 'landscape' : 'portrait',
+                    unit: 'mm',
+                    format: [format.width, format.height]
+                });
+                
+                let firstPage = true;
+                
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                        if (!firstPage) pdf.addPage();
+                        firstPage = false;
+                        
+                        const xMM = col * tileWidth - (col > 0 ? overlapMM : 0);
+                        const yMM = row * tileHeight - (row > 0 ? overlapMM : 0);
+                        
+                        const x = (xMM / pageWidthMM) * hiddenCanvas.width;
+                        const y = (yMM / pageHeightMM) * hiddenCanvas.height;
+                        const w = Math.min((format.width / pageWidthMM) * hiddenCanvas.width, hiddenCanvas.width - x);
+                        const h = Math.min((format.height / pageHeightMM) * hiddenCanvas.height, hiddenCanvas.height - y);
+                        
+                        const imageData = hiddenCtx.getImageData(x, y, w, h);
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = w;
+                        tempCanvas.height = h;
+                        const tempCtx = tempCanvas.getContext('2d');
+                        tempCtx.putImageData(imageData, 0, 0);
+                        
+                        const imgData = tempCanvas.toDataURL('image/jpeg', 0.95);
+                        pdf.addImage(imgData, 'JPEG', 0, 0, format.width, format.height, undefined, 'FAST');
+                        
+                        pdf.setFontSize(8);
+                        pdf.setTextColor(150);
+                        pdf.text(`Лист ${row + 1}-${col + 1} (${row * cols + col + 1} из ${rows * cols})`, 5, format.height - 5);
+                    }
+                }
+                
+                pdf.save(`разделение_${selectedFormat.toUpperCase()}_стр${pageNum}.pdf`);
+                showStatus(`✓ Создано ${rows * cols} листов!`);
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showStatus('❌ Ошибка разделения');
+            }
+        }
+        
+        function showStatus(message) {
+            const toast = document.getElementById('statusToast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+        
+        window.addEventListener('load', async () => {
+            loadState();
+            try {
+                const savedPDF = await loadPDFFromIndexedDB();
+                if (savedPDF && savedPDF.data) {
+                    pdfArrayBuffer = savedPDF.data;
+                    console.log('PDF восстановлен из IndexedDB, размер:', pdfArrayBuffer.byteLength);
+                    
+                    const loadingTask = pdfjsLib.getDocument({data: savedPDF.data});
+                    pdfDoc = await loadingTask.promise;
+                    
+                    document.getElementById('pageCount').textContent = pdfDoc.numPages;
+                    document.getElementById('pageNum').max = pdfDoc.numPages;
+                    document.getElementById('emptyState').style.display = 'none';
+                    document.getElementById('canvasContainer').style.display = 'block';
+                    document.getElementById('dimensionInfo').classList.add('visible');
+                    
+                    ['cropBtn', 'printBtn', 'resetBtn', 'tileBtn', 'extractBtn', 'fitBtn', 'extractVisualBtn'].forEach(id => {
+                        document.getElementById(id).disabled = false;
+                    });
+                    
+                    const savedState = loadState();
+                    if (savedState && savedState.pageNum && savedState.pageNum <= pdfDoc.numPages) {
+                        pageNum = savedState.pageNum;
+                        displayScale = savedState.displayScale || displayScale;
+                        highResScale = displayScale * 2;
+                    }
+                    
+                    await renderPage(pageNum);
+                    await generateThumbnails();
+                    fitToWidth();
+                    
+                    showStatus('✓ PDF восстановлен');
+                }
+            } catch (error) {
+                console.log('Нет сохраненного PDF');
+            }
+        });
     </script>
 </body>
 </html>
