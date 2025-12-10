@@ -1,0 +1,2059 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <title>Эмиль Бирки</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #667eea 75%, #764ba2 100%);
+            background-size: 400% 400%;
+            animation: gradientFlow 15s ease infinite;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            padding: 12px 16px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 0.5px solid rgba(255,255,255,0.3);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .stats {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            position: sticky;
+            top: 60px;
+            z-index: 99;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.08);
+            border-bottom: 0.5px solid rgba(255,255,255,0.3);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 700;
+            color: #9ca3af;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
+        }
+        
+        .tab.active {
+            color: #667eea;
+            background: linear-gradient(to bottom, rgba(102,126,234,0.05), transparent);
+        }
+        
+        .tab.active::after {
+            width: 100%;
+        }
+        
+        .content {
+            display: none;
+            padding: 16px;
+            padding-bottom: 100px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .search {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            border: 0.5px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .search:hover {
+            box-shadow: 0 12px 40px rgba(102,126,234,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .search input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid rgba(102,126,234,0.1);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.5);
+        }
+        
+        .search input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+            background: rgba(255,255,255,0.9);
+        }
+        
+        .grid {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border-radius: 16px;
+            padding: 16px;
+            cursor: pointer;
+            border: 0.5px solid rgba(255,255,255,0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            gap: 12px;
+            align-items: start;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102,126,234,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .card:hover::before {
+            left: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(102,126,234,0.15);
+            border-color: rgba(102,126,234,0.3);
+            background: rgba(255, 255, 255, 0.85);
+        }
+        
+        .card.selected {
+            border-color: #667eea;
+            box-shadow: 0 8px 30px rgba(102,126,234,0.25);
+            background: linear-gradient(to right, rgba(102,126,234,0.1), rgba(255,255,255,0.85));
+        }
+        
+        .card-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .card-checkbox {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+        
+        .quantity-control {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
+        }
+        
+        .quantity-btn {
+            width: 28px;
+            height: 28px;
+            border: 2px solid #667eea;
+            background: rgba(255,255,255,0.8);
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        
+        .quantity-btn:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .quantity-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .quantity-display {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.3);
+        }
+        
+        .card-content {
+            flex: 1;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #1f2937;
+        }
+        
+        .card-text {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            border: 0.5px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            animation: slideUp 0.6s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .section:hover {
+            box-shadow: 0 12px 40px rgba(102,126,234,0.12);
+            transform: translateY(-2px);
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 14px;
+            color: #1f2937;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 12px;
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn.primary { 
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        .btn.success { 
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+        .btn.info { 
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+        }
+        .btn.danger { 
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+        .btn.secondary { 
+            background: rgba(243,244,246,0.9);
+            color: #1F2937;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .btn.cloud { 
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+        }
+        .btn.warning { 
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+        .btn.print { 
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        }
+        .btn.usb { 
+            background: linear-gradient(135deg, #f472b6, #ec4899);
+        }
+        
+        .btn:disabled { 
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn:active:not(:disabled) { 
+            transform: scale(0.96);
+        }
+        .btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid rgba(102,126,234,0.15);
+            border-radius: 12px;
+            font-size: 15px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.7);
+        }
+        
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+            background: rgba(255,255,255,0.95);
+            transform: translateY(-2px);
+        }
+        
+        input[type="file"] { display: none; }
+        textarea { 
+            min-height: 120px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
+        }
+        
+        select {
+            cursor: pointer;
+        }
+        
+        .preview {
+            background: linear-gradient(135deg, rgba(102,126,234,0.05), rgba(246,147,251,0.05));
+            border: 3px dashed #667eea;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .preview::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102,126,234,0.1) 10%, transparent 10%);
+            background-size: 20px 20px;
+            animation: movePreview 15s linear infinite;
+        }
+        
+        @keyframes movePreview {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(20px, 20px); }
+        }
+        
+        .label {
+            width: 40mm;
+            height: 30mm;
+            border: 3px solid #1f2937;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 1mm 2mm;
+            font-size: 10pt;
+            text-align: center;
+            line-height: 1.2;
+            background: white;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            border-radius: 4px;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+        
+        .label:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 50px rgba(102,126,234,0.25);
+        }
+        
+        .controls {
+            background: linear-gradient(to bottom, rgba(249,250,251,0.8), rgba(243,244,246,0.8));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 0.5px solid rgba(255,255,255,0.5);
+        }
+        
+        .control {
+            margin-bottom: 28px;
+        }
+        
+        .control:last-child {
+            margin-bottom: 0;
+        }
+        
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #374151;
+        }
+        
+        .control-value {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+            animation: bounce 1s ease infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        .slider {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, #667eea, #764ba2, #f093fb);
+            border-radius: 10px;
+            outline: none;
+            position: relative;
+        }
+        
+        .slider::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            border-radius: 10px;
+            animation: shimmer 2s linear infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+            border: 3px solid white;
+            transition: all 0.3s ease;
+        }
+        
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 20px rgba(102,126,234,0.5);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 20px rgba(102,126,234,0.5);
+        }
+        
+        .toggle {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .toggle button {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid rgba(102,126,234,0.15);
+            background: rgba(255,255,255,0.7);
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .toggle button.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 6px 20px rgba(102,126,234,0.3);
+            transform: scale(1.05);
+        }
+        
+        .hint {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .empty-icon {
+            font-size: 60px;
+            margin-bottom: 16px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 16px;
+            right: 16px;
+            background: rgba(31,41,55,0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: white;
+            padding: 16px;
+            border-radius: 16px;
+            z-index: 1000;
+            animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast.success { 
+            background: linear-gradient(135deg, rgba(16,185,129,0.95), rgba(5,150,105,0.95));
+        }
+        .toast.error { 
+            background: linear-gradient(135deg, rgba(245,87,108,0.95), rgba(239,68,68,0.95));
+        }
+        
+        .cloud-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1f2937;
+            padding: 14px;
+            background: linear-gradient(135deg, rgba(219,234,254,0.7), rgba(191,219,254,0.7));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 0.5px solid rgba(59,130,246,0.3);
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .cloud-status .icon { 
+            font-size: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .file-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .file-row .btn {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(254,243,199,0.7), rgba(253,230,138,0.7));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 0.5px solid rgba(251,191,36,0.3);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .usb-info {
+            background: linear-gradient(135deg, rgba(251,207,232,0.7), rgba(249,168,212,0.7));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 0.5px solid rgba(236,72,153,0.3);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .usb-status {
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-weight: 700;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .usb-status.connected {
+            background: linear-gradient(135deg, rgba(209,250,229,0.7), rgba(167,243,208,0.7));
+            color: #065F46;
+            border: 0.5px solid rgba(16,185,129,0.3);
+        }
+
+        .usb-status.disconnected {
+            background: linear-gradient(135deg, rgba(254,226,226,0.7), rgba(254,202,202,0.7));
+            color: #991B1B;
+            border: 0.5px solid rgba(239,68,68,0.3);
+        }
+
+        .selection-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            padding: 14px 16px;
+            box-shadow: 0 -8px 32px rgba(0,0,0,0.1);
+            display: none;
+            gap: 10px;
+            z-index: 101;
+            border-top: 0.5px solid rgba(255,255,255,0.3);
+        }
+
+        .selection-bar.visible {
+            display: flex;
+            animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .selection-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 15px;
+        }
+
+        .selection-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .selection-actions button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+        }
+
+        .selection-actions button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+        }
+
+        .selection-actions .btn-usb {
+            background: linear-gradient(135deg, #f472b6, #ec4899);
+            color: white;
+        }
+
+        .selection-actions .btn-pdf {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .selection-actions .btn-png {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+        }
+
+        .selection-actions .btn-print {
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            color: white;
+        }
+
+        .selection-actions .btn-clear {
+            background: rgba(243,244,246,0.9);
+            color: #1F2937;
+            min-width: 44px;
+        }
+        
+        @media print {
+            @page {
+                size: 40mm 30mm;
+                margin: 0;
+            }
+            
+            * {
+                margin: 0;
+                padding: 0;
+            }
+            
+            body {
+                margin: 0;
+                padding: 0;
+                background: white;
+            }
+            
+            body > *:not(#printArea) {
+                display: none !important;
+            }
+            
+            #printArea {
+                display: block !important;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .print-label {
+                width: 40mm;
+                height: 30mm;
+                border: 2px solid #000;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                text-align: center;
+                margin: 0;
+                padding: 0 2mm;
+                box-sizing: border-box;
+                page-break-after: always;
+                background: white;
+            }
+
+            .print-label:last-child {
+                page-break-after: avoid;
+            }
+        }
+        
+        #printArea { display: none; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">🏷️</div>
+            <h1>Эмиль Бирки</h1>
+        </div>
+        <div class="stats" id="stats">0</div>
+    </div>
+    
+    <div class="tabs">
+        <button class="tab active" id="tabList">📋 Список</button>
+        <button class="tab" id="tabEditor">✏️ Редактор</button>
+        <button class="tab" id="tabManage">⚙️ Управление</button>
+    </div>
+    
+    <div class="content active" id="tab0">
+        <div class="search">
+            <input type="text" id="search" placeholder="🔍 Поиск бирок...">
+        </div>
+        <div id="grid" class="grid"></div>
+    </div>
+    
+    <div class="content" id="tab1">
+        <div class="section">
+            <div class="section-title">✏️ Текст бирки</div>
+            <div id="hint" class="hint">Выбери бирку из списка для редактирования</div>
+            <div id="editor" style="display:none">
+                <input type="text" id="l1" placeholder="Группа">
+                <input type="text" id="l2" placeholder="Описание">
+                <input type="text" id="l3" placeholder="Кабель">
+                <input type="text" id="l4" placeholder="От щита (заполняется автоматически)">
+                <input type="text" id="l5" placeholder="Длина">
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">👁️ Превью</div>
+            <div class="preview">
+                <div class="label" id="preview">
+                    <div class="line1"></div>
+                    <div class="line2"></div>
+                    <div class="line3"></div>
+                    <div class="line4"></div>
+                    <div class="line5"></div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="control">
+                    <div class="control-label">
+                        <span>📝 Размер 1-й строки</span>
+                        <div class="control-value" id="v1">12pt</div>
+                    </div>
+                    <input type="range" class="slider" id="s1" min="8" max="18" value="12" step="0.5">
+                </div>
+                
+                <div class="control">
+                    <div class="control-label"><span>💪 Жирность 1-й строки</span></div>
+                    <div class="toggle" id="toggle1">
+                        <button data-weight="normal">Обычная</button>
+                        <button data-weight="bold" class="active">Жирная</button>
+                    </div>
+                </div>
+                
+                <div class="control">
+                    <div class="control-label">
+                        <span>📝 Размер остальных строк</span>
+                        <div class="control-value" id="v2">10pt</div>
+                    </div>
+                    <input type="range" class="slider" id="s2" min="7" max="16" value="10" step="0.5">
+                </div>
+                
+                <div class="control">
+                    <div class="control-label"><span>💪 Жирность остальных</span></div>
+                    <div class="toggle" id="toggle2">
+                        <button data-weight="normal" class="active">Обычная</button>
+                        <button data-weight="bold">Жирная</button>
+                    </div>
+                </div>
+                
+                <div class="control">
+                    <div class="control-label">
+                        <span>↕️ Интервал между строками</span>
+                        <div class="control-value" id="v3">1.2</div>
+                    </div>
+                    <input type="range" class="slider" id="s3" min="0.9" max="1.6" value="1.2" step="0.05">
+                </div>
+                
+                <div class="control">
+                    <div class="control-label">
+                        <span>⬇️ Отступ сверху</span>
+                        <div class="control-value" id="v4">0.5мм</div>
+                    </div>
+                    <input type="range" class="slider" id="s4" min="0" max="6" value="0.5" step="0.5">
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">🔌 USB печать (Картинкой)</div>
+            
+            <div class="usb-info">
+                <strong>⚡ Печать попиксельно через USB!</strong><br>
+                Работает только в Chrome/Edge. Подключи принтер через USB и нажми "Подключить".
+            </div>
+            
+            <div class="usb-status disconnected" id="usbStatus">
+                🔴 Принтер не подключен
+            </div>
+            
+            <button class="btn usb" id="usbConnectBtn">🔌 Подключить USB принтер</button>
+            <button class="btn usb" id="usbPrintBtn" disabled>⚡ Печать через USB</button>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">📄 Экспорт</div>
+            
+            <button class="btn success" id="pngBtn" disabled>🖼️ Скачать PNG</button>
+            <button class="btn danger" id="pdfBtn" disabled>📄 Скачать PDF</button>
+            <button class="btn print" id="printBtn" disabled>🖨️ Обычная печать</button>
+            <button class="btn primary" id="saveBtn" disabled>💾 Сохранить изменения</button>
+        </div>
+    </div>
+    
+    <div class="content" id="tab2">
+        <div class="section">
+            <div class="section-title">🔧 Исправления</div>
+            <div class="hint" style="margin-bottom: 12px;">
+                Убрать цифровые суффиксы из поля "От щита"<br>
+                Например: "от ЩР-П-1" → "от ЩР-П"
+            </div>
+            <button class="btn warning" id="fixBtn">🔧 Исправить все бирки</button>
+        </div>
+
+        <div class="section">
+            <div class="section-title">💾 Локальное хранилище</div>
+            
+            <div class="cloud-status">
+                <span class="icon">📱</span>
+                <span id="localStatus">Загрузка...</span>
+            </div>
+
+            <input type="file" id="fileInput" accept=".json">
+            <div class="file-row">
+                <button class="btn info" id="loadFileBtn">📂 Загрузить JSON</button>
+                <button class="btn success" id="saveFileBtn">💾 Скачать JSON</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">☁️ База данных на Яндекс.Диске</div>
+            
+            <div class="cloud-status">
+                <span class="icon">☁️</span>
+                <span>Скачай файл JSON с Яндекс.Диска, затем загрузи его через кнопку выше</span>
+            </div>
+
+            <a href="https://disk.yandex.ru/d/AZzpGJ765_EA_w" target="_blank" class="btn cloud">📥 Открыть Яндекс.Диск</a>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📥 Импорт текстом</div>
+            <div class="hint" style="margin-bottom: 12px;">
+                Каждая бирка через пустую строку
+            </div>
+            <textarea id="import" placeholder="1РП3-Гр.-3.1
+Освещение электрощитовой
+ВВГнг(А)-LSLTx 3×1.5
+от 1РП3
+L=15м
+
+1РП3-ЩО-0.1
+ЩО-0
+ВВГнг(А)-LSLTx 5×2.5
+от 1РП3
+L=50м"></textarea>
+            <button class="btn primary" id="importBtn">📥 Импортировать</button>
+        </div>
+    </div>
+    
+    <div class="selection-bar" id="selectionBar">
+        <div class="selection-info">
+            <span>🏷️</span>
+            <span id="selectionCount">0</span>
+            <span>шт</span>
+            <span>•</span>
+            <span id="totalQuantity">0</span>
+            <span>печати</span>
+        </div>
+        <div class="selection-actions">
+            <button class="btn-usb" id="batchUsbBtn">⚡</button>
+            <button class="btn-png" id="batchPngBtn">🖼️</button>
+            <button class="btn-pdf" id="batchPdfBtn">📄</button>
+            <button class="btn-print" id="batchPrintBtn">🖨️</button>
+            <button class="btn-clear" id="clearSelectionBtn">✕</button>
+        </div>
+    </div>
+
+    <div id="printArea"></div>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+        let labels = [];
+        let filtered = [];
+        let idx = -1;
+        let w1 = 'bold';
+        let w2 = 'normal';
+        let selectedIndices = new Map();
+        let usbDevice = null;
+        let usbEndpoint = null;
+        
+        // АВТОЗАПОЛНЕНИЕ "От щита" из группы
+        function autoFillFromShield(groupName) {
+            if (!groupName) return '';
+            
+            const parts = groupName.split('-');
+            if (parts.length === 0) return '';
+            
+            let shieldName = parts[0];
+            
+            if (parts.length > 1) {
+                const secondPart = parts[1];
+                if (!/^\d+$/.test(secondPart)) {
+                    shieldName += '-' + secondPart;
+                }
+            }
+            
+            return 'от ' + shieldName;
+        }
+        
+        function saveToStorage() {
+            try {
+                localStorage.setItem('birki_labels', JSON.stringify(labels));
+                updateLocalStatus();
+            } catch(e) {
+                console.error('Ошибка сохранения:', e);
+            }
+        }
+        
+        function loadFromStorage() {
+            try {
+                const saved = localStorage.getItem('birki_labels');
+                if (saved) {
+                    labels = JSON.parse(saved);
+                    updateLocalStatus();
+                }
+            } catch(e) {
+                console.error('Ошибка загрузки:', e);
+            }
+        }
+        
+        function updateLocalStatus() {
+            document.getElementById('localStatus').textContent = 
+                labels.length > 0 ? `✅ ${labels.length} бирок` : '❌ Пусто';
+        }
+
+        function fixLabels() {
+            let fixed = 0;
+            labels.forEach(label => {
+                if (label.line4) {
+                    const parts = label.line4.split(' ');
+                    if (parts.length === 2 && parts[0] === 'от') {
+                        const code = parts[1];
+                        const codeParts = code.split('-');
+                        if (codeParts.length > 0) {
+                            const lastPart = codeParts[codeParts.length - 1];
+                            if (lastPart && /^\d/.test(lastPart)) {
+                                codeParts.pop();
+                                label.line4 = 'от ' + codeParts.join('-');
+                                fixed++;
+                            }
+                        }
+                    }
+                }
+            });
+            
+            if (fixed > 0) {
+                saveToStorage();
+                applySearch();
+                toast(`✅ Исправлено ${fixed} бирок!`, 'success');
+            } else {
+                toast('✅ Всё уже исправлено!', 'success');
+            }
+        }
+
+        function loadFromFile() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (Array.isArray(data)) {
+                        labels = data;
+                        saveToStorage();
+                        updateStats();
+                        applySearch();
+                        toast(`✅ Загружено ${labels.length} бирок!`, 'success');
+                    } else {
+                        throw new Error('Неверный формат');
+                    }
+                } catch(err) {
+                    toast('❌ Ошибка чтения файла', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function saveToFile() {
+            const dataStr = JSON.stringify(labels, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'emil_birki_' + new Date().toISOString().slice(0,10) + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            toast('💾 Файл сохранён!', 'success');
+        }
+        
+        function toast(msg, type) {
+            const t = document.createElement('div');
+            t.className = 'toast ' + (type || '');
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+        
+        function updateStats() {
+            document.getElementById('stats').textContent = labels.length;
+        }
+
+        function updateSelectionBar() {
+            const bar = document.getElementById('selectionBar');
+            const count = document.getElementById('selectionCount');
+            const total = document.getElementById('totalQuantity');
+            
+            const totalQty = Array.from(selectedIndices.values()).reduce((sum, qty) => sum + qty, 0);
+            
+            if (selectedIndices.size > 0) {
+                bar.classList.add('visible');
+                count.textContent = selectedIndices.size;
+                total.textContent = totalQty;
+            } else {
+                bar.classList.remove('visible');
+            }
+        }
+
+        function setQuantity(index, quantity) {
+            if (quantity > 0) {
+                selectedIndices.set(index, quantity);
+            } else {
+                selectedIndices.delete(index);
+            }
+            updateSelectionBar();
+            render();
+        }
+
+        function clearSelection() {
+            selectedIndices.clear();
+            updateSelectionBar();
+            render();
+        }
+        
+        function render() {
+            const g = document.getElementById('grid');
+            g.innerHTML = '';
+            if (!filtered.length) {
+                g.innerHTML = '<div class="empty"><div class="empty-icon">🏷️</div><div>Нет бирок</div><small>Загрузи файл JSON</small></div>';
+                return;
+            }
+            filtered.forEach((l,i) => {
+                const isSelected = selectedIndices.has(i);
+                const quantity = selectedIndices.get(i) || 1;
+                
+                const c = document.createElement('div');
+                c.className = 'card' + (i===idx?' selected':'') + (isSelected?' selected':'');
+                
+                const leftDiv = document.createElement('div');
+                leftDiv.className = 'card-left';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'card-checkbox';
+                checkbox.checked = isSelected;
+                checkbox.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (checkbox.checked) {
+                        selectedIndices.set(i, 1);
+                    } else {
+                        selectedIndices.delete(i);
+                    }
+                    updateSelectionBar();
+                    render();
+                });
+                
+                const qtyControl = document.createElement('div');
+                qtyControl.className = 'quantity-control';
+                
+                if (isSelected) {
+                    const btnUp = document.createElement('button');
+                    btnUp.className = 'quantity-btn';
+                    btnUp.textContent = '▲';
+                    btnUp.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        setQuantity(i, quantity + 1);
+                    });
+                    
+                    const display = document.createElement('div');
+                    display.className = 'quantity-display';
+                    display.textContent = quantity;
+                    
+                    const btnDown = document.createElement('button');
+                    btnDown.className = 'quantity-btn';
+                    btnDown.textContent = '▼';
+                    btnDown.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (quantity > 1) {
+                            setQuantity(i, quantity - 1);
+                        }
+                    });
+                    
+                    qtyControl.appendChild(btnUp);
+                    qtyControl.appendChild(display);
+                    qtyControl.appendChild(btnDown);
+                }
+                
+                leftDiv.appendChild(checkbox);
+                leftDiv.appendChild(qtyControl);
+                
+                const content = document.createElement('div');
+                content.className = 'card-content';
+                content.innerHTML = `<div class="card-title">${l.line1||l.id||''}</div><div class="card-text">${l.line2||l.label||''}</div><div class="card-text">${l.line3||l.reference||''}</div><div class="card-text">${l.line4||''}</div>`;
+                content.addEventListener('click', () => {
+                    idx = i;
+                    render();
+                    fillEditor();
+                    showTab(1);
+                });
+                
+                c.appendChild(leftDiv);
+                c.appendChild(content);
+                g.appendChild(c);
+            });
+        }
+        
+        function applySearch() {
+            const q = document.getElementById('search').value.toLowerCase();
+            filtered = q ? labels.filter(l => Object.values(l).some(v => String(v).toLowerCase().includes(q))) : labels.slice();
+            selectedIndices.clear();
+            updateSelectionBar();
+            render();
+        }
+        
+        function showTab(n) {
+            document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
+            document.querySelectorAll('.content').forEach((c,i) => c.classList.toggle('active', i===n));
+        }
+        
+        function fillEditor() {
+            if (idx < 0) {
+                document.getElementById('editor').style.display = 'none';
+                document.getElementById('hint').style.display = 'block';
+                ['usbPrintBtn', 'printBtn', 'pngBtn', 'pdfBtn', 'saveBtn'].forEach(id => {
+                    document.getElementById(id).disabled = true;
+                });
+                return;
+            }
+            const l = filtered[idx];
+            const groupName = l.line1 || l.id || '';
+            
+            document.getElementById('l1').value = groupName;
+            document.getElementById('l2').value = l.line2 || l.label || '';
+            document.getElementById('l3').value = l.line3 || l.reference || '';
+            
+            if (!l.line4 || l.line4.trim() === '') {
+                l.line4 = autoFillFromShield(groupName);
+            }
+            document.getElementById('l4').value = l.line4 || '';
+            
+            document.getElementById('l5').value = l.line5 || '';
+            document.getElementById('editor').style.display = 'block';
+            document.getElementById('hint').style.display = 'none';
+            ['printBtn', 'pngBtn', 'pdfBtn', 'saveBtn'].forEach(id => {
+                document.getElementById(id).disabled = false;
+            });
+            if (usbDevice) {
+                document.getElementById('usbPrintBtn').disabled = false;
+            }
+            updatePreview();
+        }
+        
+        document.getElementById('l1').addEventListener('input', function() {
+            const groupName = this.value;
+            const l4Input = document.getElementById('l4');
+            
+            if (!l4Input.value || l4Input.value.startsWith('от ')) {
+                l4Input.value = autoFillFromShield(groupName);
+            }
+            
+            updatePreview();
+        });
+        
+        function updatePreview() {
+            const pt = parseFloat(document.getElementById('s4').value);
+            const lh = parseFloat(document.getElementById('s3').value);
+            const f1 = parseFloat(document.getElementById('s1').value);
+            const f2 = parseFloat(document.getElementById('s2').value);
+            
+            const p = document.getElementById('preview');
+            p.style.paddingTop = pt + 'mm';
+            p.style.lineHeight = lh;
+            
+            const lines = p.querySelectorAll('div');
+            lines[0].textContent = document.getElementById('l1').value;
+            lines[0].style.fontSize = f1 + 'pt';
+            lines[0].style.fontWeight = w1;
+            
+            for (let i=1; i<5; i++) {
+                lines[i].textContent = document.getElementById('l'+(i+1)).value;
+                lines[i].style.fontSize = f2 + 'pt';
+                lines[i].style.fontWeight = w2;
+            }
+            
+            document.getElementById('v1').textContent = f1 + 'pt';
+            document.getElementById('v2').textContent = f2 + 'pt';
+            document.getElementById('v3').textContent = lh.toFixed(2);
+            document.getElementById('v4').textContent = pt + 'мм';
+        }
+
+        // USB, PNG, PDF и остальные функции остаются без изменений
+        async function connectUSB() {
+            if (!navigator.usb) {
+                toast('❌ WebUSB не поддерживается! Используй Chrome/Edge', 'error');
+                return;
+            }
+            
+            try {
+                usbDevice = await navigator.usb.requestDevice({
+                    filters: [
+                        { vendorId: 0x0416 },
+                        { vendorId: 0x1FC9 },
+                        { classCode: 7 }
+                    ]
+                });
+                
+                await usbDevice.open();
+                
+                if (usbDevice.configuration === null) {
+                    await usbDevice.selectConfiguration(1);
+                }
+                
+                await usbDevice.claimInterface(0);
+                
+                const ep = usbDevice.configuration.interfaces[0].alternate.endpoints.find(e => e.direction === 'out');
+                if (ep) usbEndpoint = ep.endpointNumber;
+                else usbEndpoint = 1;
+                
+                document.getElementById('usbStatus').className = 'usb-status connected';
+                document.getElementById('usbStatus').textContent = '🟢 Принтер подключен: ' + (usbDevice.productName || 'USB Принтер');
+                
+                if (idx >= 0) {
+                    document.getElementById('usbPrintBtn').disabled = false;
+                }
+                
+                toast('✅ USB принтер подключен!', 'success');
+                
+            } catch (error) {
+                console.error('Ошибка подключения USB:', error);
+                toast('❌ Не удалось подключиться: ' + error.message, 'error');
+            }
+        }
+        
+        async function printUSB() {
+            if (!usbDevice) {
+                toast('❌ Сначала подключи принтер!', 'error');
+                return;
+            }
+            
+            if (idx < 0) return;
+            
+            try {
+                const canvas = await html2canvas(document.getElementById('preview'), {
+                    scale: 2,
+                    backgroundColor: '#ffffff'
+                });
+                
+                const ctx = canvas.getContext('2d');
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const pixels = imgData.data;
+                
+                const w = canvas.width;
+                const h = canvas.height;
+                const bytesPerRow = Math.ceil(w / 8);
+                
+                const bitmapBytes = [];
+                for (let y = 0; y < h; y++) {
+                    let bits = '';
+                    for (let x = 0; x < w; x++) {
+                        const i = (y * w + x) * 4;
+                        const brightness = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+                        bits += brightness < 128 ? '0' : '1';
+                    }
+                    while (bits.length % 8 !== 0) bits += '1';
+                    
+                    for (let i = 0; i < bits.length; i += 8) {
+                        const byte = parseInt(bits.substring(i, i + 8), 2);
+                        bitmapBytes.push(byte);
+                    }
+                }
+                
+                let cmd = '';
+                cmd += 'SIZE 40 mm,30 mm\r\n';
+                cmd += 'GAP 2 mm,0 mm\r\n';
+                cmd += 'DIRECTION 1\r\n';
+                cmd += 'CLS\r\n';
+                cmd += `BITMAP 0,0,${bytesPerRow},${h},1,`;
+                
+                const cmdBytes = [];
+                for (let i = 0; i < cmd.length; i++) {
+                    cmdBytes.push(cmd.charCodeAt(i));
+                }
+                
+                cmdBytes.push(...bitmapBytes);
+                
+                const footer = '\r\nPRINT 1,1\r\n';
+                for (let i = 0; i < footer.length; i++) {
+                    cmdBytes.push(footer.charCodeAt(i));
+                }
+                
+                const data = new Uint8Array(cmdBytes);
+                await usbDevice.transferOut(usbEndpoint, data);
+                
+                toast('⚡ Отправлено на принтер!', 'success');
+                
+            } catch (error) {
+                console.error('Ошибка печати:', error);
+                toast('❌ Ошибка печати: ' + error.message, 'error');
+            }
+        }
+        
+        async function batchPrintUSB() {
+            if (!usbDevice) {
+                toast('❌ Сначала подключи принтер!', 'error');
+                return;
+            }
+            
+            if (selectedIndices.size === 0) {
+                toast('⚠️ Выбери бирки!', 'error');
+                return;
+            }
+            
+            try {
+                const sortedEntries = Array.from(selectedIndices.entries()).sort((a, b) => a[0] - b[0]);
+                let totalPrinted = 0;
+                
+                for (const [i, quantity] of sortedEntries) {
+                    const label = filtered[i];
+                    
+                    for (let q = 0; q < quantity; q++) {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.style.position = 'absolute';
+                        tempDiv.style.left = '-9999px';
+                        
+                        const pt = parseFloat(document.getElementById('s4').value);
+                        const lh = parseFloat(document.getElementById('s3').value);
+                        const f1 = parseFloat(document.getElementById('s1').value);
+                        const f2 = parseFloat(document.getElementById('s2').value);
+                        
+                        tempDiv.innerHTML = `
+                            <div class="label" style="padding-top:${pt}mm;line-height:${lh};width:40mm;height:30mm;border:2px solid #000;display:flex;flex-direction:column;justify-content:center;text-align:center;padding-left:2mm;padding-right:2mm;background:white;font-size:10pt;">
+                                <div style="font-size:${f1}pt;font-weight:${w1}">${label.line1 || ''}</div>
+                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line2 || ''}</div>
+                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line3 || ''}</div>
+                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line4 || ''}</div>
+                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line5 || ''}</div>
+                            </div>
+                        `;
+                        document.body.appendChild(tempDiv);
+                        
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                        
+                        const canvas = await html2canvas(tempDiv.firstElementChild, {
+                            scale: 2,
+                            backgroundColor: '#ffffff'
+                        });
+                        
+                        const ctx = canvas.getContext('2d');
+                        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const pixels = imgData.data;
+                        
+                        const w = canvas.width;
+                        const h = canvas.height;
+                        const bytesPerRow = Math.ceil(w / 8);
+                        
+                        const bitmapBytes = [];
+                        for (let y = 0; y < h; y++) {
+                            let bits = '';
+                            for (let x = 0; x < w; x++) {
+                                const idx = (y * w + x) * 4;
+                                const brightness = (pixels[idx] + pixels[idx + 1] + pixels[idx + 2]) / 3;
+                                bits += brightness < 128 ? '0' : '1';
+                            }
+                            while (bits.length % 8 !== 0) bits += '1';
+                            
+                            for (let j = 0; j < bits.length; j += 8) {
+                                const byte = parseInt(bits.substring(j, j + 8), 2);
+                                bitmapBytes.push(byte);
+                            }
+                        }
+                        
+                        let cmd = '';
+                        cmd += 'SIZE 40 mm,30 mm\r\n';
+                        cmd += 'GAP 2 mm,0 mm\r\n';
+                        cmd += 'DIRECTION 1\r\n';
+                        cmd += 'CLS\r\n';
+                        cmd += `BITMAP 0,0,${bytesPerRow},${h},1,`;
+                        
+                        const cmdBytes = [];
+                        for (let j = 0; j < cmd.length; j++) {
+                            cmdBytes.push(cmd.charCodeAt(j));
+                        }
+                        
+                        cmdBytes.push(...bitmapBytes);
+                        
+                        const footer = '\r\nPRINT 1,1\r\n';
+                        for (let j = 0; j < footer.length; j++) {
+                            cmdBytes.push(footer.charCodeAt(j));
+                        }
+                        
+                        const data = new Uint8Array(cmdBytes);
+                        await usbDevice.transferOut(usbEndpoint, data);
+                        
+                        document.body.removeChild(tempDiv);
+                        totalPrinted++;
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    }
+                }
+                
+                toast(`⚡ Напечатано ${totalPrinted} бирок!`, 'success');
+                
+            } catch (error) {
+                console.error('Ошибка печати:', error);
+                toast('❌ Ошибка печати: ' + error.message, 'error');
+            }
+        }
+
+        async function exportPNG() {
+            if (idx < 0) return;
+            
+            try {
+                const canvas = await html2canvas(document.getElementById('preview'), {
+                    scale: 4,
+                    backgroundColor: '#ffffff',
+                    width: 151,
+                    height: 113
+                });
+                
+                const l = document.getElementById('l1').value;
+                const a = document.createElement('a');
+                a.href = canvas.toDataURL('image/png');
+                a.download = `emil_birka_${l.replace(/[^a-zA-Z0-9]/g,'_')}.png`;
+                a.click();
+                toast('🖼️ PNG сохранён!', 'success');
+            } catch(e) {
+                console.error('Ошибка PNG:', e);
+                toast('❌ Ошибка экспорта PNG', 'error');
+            }
+        }
+
+        async function batchPNG() {
+            if (selectedIndices.size === 0) {
+                toast('⚠️ Выбери бирки!', 'error');
+                return;
+            }
+
+            try {
+                const sortedEntries = Array.from(selectedIndices.entries()).sort((a, b) => a[0] - b[0]);
+                
+                for (const [i, quantity] of sortedEntries) {
+                    const label = filtered[i];
+                    
+                    for (let q = 0; q < quantity; q++) {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.style.position = 'absolute';
+                        tempDiv.style.left = '-9999px';
+                        
+                        const pt = parseFloat(document.getElementById('s4').value);
+                        const lh = parseFloat(document.getElementById('s3').value);
+                        const f1 = parseFloat(document.getElementById('s1').value);
+                        const f2 = parseFloat(document.getElementById('s2').value);
+                        
+                        tempDiv.innerHTML = `
+                            <div class="label" style="padding-top:${pt}mm;line-height:${lh};width:40mm;height:30mm;border:2px solid #000;display:flex;flex-direction:column;justify-content:center;text-align:center;padding-left:2mm;padding-right:2mm;background:white;font-size:10pt;">
+                                <div style="font-size:${f1}pt;font-weight:${w1}">${label.line1 || ''}</div>
+                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line2 || ''}</div>
+                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line3 || ''}</div>
+                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line4 || ''}</div>
+                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line5 || ''}</div>
+                            </div>
+                        `;
+                        document.body.appendChild(tempDiv);
+                        
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        
+                        const canvas = await html2canvas(tempDiv.firstElementChild, {
+                            scale: 4,
+                            backgroundColor: '#ffffff'
+                        });
+                        
+                        const a = document.createElement('a');
+                        const filename = (label.line1 || 'birka').replace(/[^a-zA-Z0-9]/g, '_');
+                        a.href = canvas.toDataURL('image/png');
+                        a.download = `emil_${filename}_${q+1}.png`;
+                        a.click();
+                        
+                        document.body.removeChild(tempDiv);
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                    }
+                }
+                
+                const totalQty = Array.from(selectedIndices.values()).reduce((sum, qty) => sum + qty, 0);
+                toast(`🖼️ Создано ${totalQty} PNG файлов!`, 'success');
+                
+            } catch(e) {
+                console.error('Ошибка PNG:', e);
+                toast('❌ Ошибка экспорта PNG', 'error');
+            }
+        }
+
+        async function exportPDF() {
+            if (idx < 0) return;
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: [40, 30]
+                });
+
+                const canvas = await html2canvas(document.getElementById('preview'), {
+                    scale: 4,
+                    backgroundColor: '#ffffff'
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                pdf.addImage(imgData, 'PNG', 0, 0, 40, 30);
+                
+                const l = document.getElementById('l1').value;
+                pdf.save(`emil_birka_${l.replace(/[^a-zA-Z0-9]/g,'_')}.pdf`);
+                toast('📄 PDF сохранён!', 'success');
+            } catch(e) {
+                console.error('Ошибка PDF:', e);
+                toast('❌ Ошибка экспорта PDF', 'error');
+            }
+        }
+
+        async function batchPDF() {
+            if (selectedIndices.size === 0) {
+                toast('⚠️ Выбери бирки!', 'error');
+                return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: [40, 30]
+                });
+
+                const f1 = parseFloat(document.getElementById('s1').value);
+                const f2 = parseFloat(document.getElementById('s2').value);
+                const lh = parseFloat(document.getElementById('s3').value);
+                const pt = parseFloat(document.getElementById('s4').value);
+
+                let isFirst = true;
+                const sortedEntries = Array.from(selectedIndices.entries()).sort((a, b) => a[0] - b[0]);
+
+                for (const [i, quantity] of sortedEntries) {
+                    const label = filtered[i];
+                    
+                    for (let q = 0; q < quantity; q++) {
+                        if (!isFirst) {
+                            pdf.addPage();
+                        }
+                        isFirst = false;
+
+                        const tempDiv = document.createElement('div');
+                        tempDiv.style.position = 'absolute';
+                        tempDiv.style.left = '-9999px';
+                        
+                        tempDiv.innerHTML = `
+                            <div class="label" style="padding-top:${pt}mm;line-height:${lh};width:40mm;height:30mm;border:2px solid #000;display:flex;flex-direction:column;justify-content:center;text-align:center;padding-left:2mm;padding-right:2mm;background:white;font-size:10pt;">
+                                <div style="font-size:${f1}pt;font-weight:${w1}">${label.line1 || ''}</div>
+                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line2 || ''}</div>
+                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line3 || ''}</div>
+                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line4 || ''}</div>
+                                <div style="font-size:${f2}pt;font-weight:${w2}">${label.line5 || ''}</div>
+                            </div>
+                        `;
+                        document.body.appendChild(tempDiv);
+
+                        await new Promise(resolve => setTimeout(resolve, 50));
+
+                        const canvas = await html2canvas(tempDiv.firstElementChild, {
+                            scale: 4,
+                            backgroundColor: '#ffffff'
+                        });
+
+                        const imgData = canvas.toDataURL('image/png');
+                        pdf.addImage(imgData, 'PNG', 0, 0, 40, 30);
+
+                        document.body.removeChild(tempDiv);
+                    }
+                }
+
+                const totalQty = Array.from(selectedIndices.values()).reduce((sum, qty) => sum + qty, 0);
+                pdf.save(`emil_birki_${totalQty}_${new Date().toISOString().slice(0,10)}.pdf`);
+                toast(`📄 PDF создан: ${totalQty} бирок!`, 'success');
+            } catch(e) {
+                console.error('Ошибка PDF:', e);
+                toast('❌ Ошибка создания PDF', 'error');
+            }
+        }
+
+        function printSingle() {
+            if (idx < 0) return;
+            
+            const f1 = parseFloat(document.getElementById('s1').value);
+            const f2 = parseFloat(document.getElementById('s2').value);
+            const lh = parseFloat(document.getElementById('s3').value);
+            const pt = parseFloat(document.getElementById('s4').value);
+            
+            const label = filtered[idx];
+            const html = getLabelHTML(label, f1, f2, lh, pt);
+            
+            document.getElementById('printArea').innerHTML = html;
+            setTimeout(() => {
+                window.print();
+                toast('🖨️ Отправлено на печать!', 'success');
+            }, 300);
+        }
+
+        function getLabelHTML(label, f1, f2, lh, pt) {
+            const lines = [
+                `<div style="font-size:${f1}pt;font-weight:${w1}">${label.line1 || ''}</div>`,
+                `<div style="font-size:${f2}pt;font-weight:${w2}">${label.line2 || ''}</div>`,
+                `<div style="font-size:${f2}pt;font-weight:${w2}">${label.line3 || ''}</div>`,
+                `<div style="font-size:${f2}pt;font-weight:${w2}">${label.line4 || ''}</div>`,
+                `<div style="font-size:${f2}pt;font-weight:${w2}">${label.line5 || ''}</div>`
+            ];
+            
+            return `<div class="print-label" style="padding-top:${pt}mm;line-height:${lh}">${lines.join('')}</div>`;
+        }
+        
+        function batchPrint() {
+            if (selectedIndices.size === 0) {
+                toast('⚠️ Выбери бирки!', 'error');
+                return;
+            }
+
+            const f1 = parseFloat(document.getElementById('s1').value);
+            const f2 = parseFloat(document.getElementById('s2').value);
+            const lh = parseFloat(document.getElementById('s3').value);
+            const pt = parseFloat(document.getElementById('s4').value);
+            
+            const htmlParts = [];
+            const sortedEntries = Array.from(selectedIndices.entries()).sort((a, b) => a[0] - b[0]);
+            
+            sortedEntries.forEach(([i, quantity]) => {
+                const label = filtered[i];
+                for (let q = 0; q < quantity; q++) {
+                    htmlParts.push(getLabelHTML(label, f1, f2, lh, pt));
+                }
+            });
+
+            document.getElementById('printArea').innerHTML = htmlParts.join('');
+            setTimeout(() => {
+                window.print();
+                const totalQty = Array.from(selectedIndices.values()).reduce((sum, qty) => sum + qty, 0);
+                toast(`🖨️ ${totalQty} бирок отправлены на печать!`, 'success');
+            }, 300);
+        }
+
+        function importLabels() {
+            const text = document.getElementById('import').value;
+            const blocks = text.trim().split('\n\n');
+            let imported = 0;
+            
+            blocks.forEach(block => {
+                const lines = block.trim().split('\n').map(l => l.trim()).filter(l => l);
+                if (lines.length >= 5) {
+                    const groupName = lines[0];
+                    labels.push({
+                        line1: groupName,
+                        line2: lines[1],
+                        line3: lines[2],
+                        line4: lines[3] || autoFillFromShield(groupName),
+                        line5: lines[4]
+                    });
+                    imported++;
+                }
+            });
+            
+            if (imported > 0) {
+                saveToStorage();
+                updateStats();
+                applySearch();
+                document.getElementById('import').value = '';
+                toast(`✅ Импортировано ${imported} бирок!`, 'success');
+            } else {
+                toast('⚠️ Не найдено корректных бирок', 'error');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('search').addEventListener('input', applySearch);
+        document.getElementById('tabList').addEventListener('click', () => showTab(0));
+        document.getElementById('tabEditor').addEventListener('click', () => showTab(1));
+        document.getElementById('tabManage').addEventListener('click', () => showTab(2));
+
+        document.querySelectorAll('.slider').forEach(s => {
+            s.addEventListener('input', updatePreview);
+        });
+        
+        document.querySelectorAll('.toggle').forEach(t => {
+            t.querySelectorAll('button').forEach(b => {
+                b.addEventListener('click', function() {
+                    const parent = this.parentElement;
+                    const toggle = parent.id === 'toggle1' ? 1 : 2;
+                    const weight = this.dataset.weight;
+                    if (toggle === 1) w1 = weight;
+                    else w2 = weight;
+                    parent.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    updatePreview();
+                });
+            });
+        });
+
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            if (idx < 0) return;
+            filtered[idx].line1 = document.getElementById('l1').value;
+            filtered[idx].line2 = document.getElementById('l2').value;
+            filtered[idx].line3 = document.getElementById('l3').value;
+            filtered[idx].line4 = document.getElementById('l4').value;
+            filtered[idx].line5 = document.getElementById('l5').value;
+            
+            const realIdx = labels.indexOf(filtered[idx]);
+            if (realIdx >= 0) {
+                labels[realIdx] = filtered[idx];
+            }
+            
+            saveToStorage();
+            toast('💾 Бирка сохранена!', 'success');
+        });
+
+        document.getElementById('usbConnectBtn').addEventListener('click', connectUSB);
+        document.getElementById('usbPrintBtn').addEventListener('click', printUSB);
+        document.getElementById('batchUsbBtn').addEventListener('click', batchPrintUSB);
+        document.getElementById('printBtn').addEventListener('click', printSingle);
+        document.getElementById('batchPrintBtn').addEventListener('click', batchPrint);
+        document.getElementById('pngBtn').addEventListener('click', exportPNG);
+        document.getElementById('batchPngBtn').addEventListener('click', batchPNG);
+        document.getElementById('pdfBtn').addEventListener('click', exportPDF);
+        document.getElementById('batchPdfBtn').addEventListener('click', batchPDF);
+        document.getElementById('fixBtn').addEventListener('click', fixLabels);
+        document.getElementById('loadFileBtn').addEventListener('click', loadFromFile);
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        document.getElementById('saveFileBtn').addEventListener('click', saveToFile);
+        document.getElementById('importBtn').addEventListener('click', importLabels);
+        document.getElementById('clearSelectionBtn').addEventListener('click', clearSelection);
+
+        // Initialize
+        loadFromStorage();
+        updateStats();
+        render();
+    </script>
+</body>
+</html>
