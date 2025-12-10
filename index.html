@@ -1,354 +1,212 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Эмил PDF – PDF Просмотрщик</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <title>Эмиль PDF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            overflow: hidden;
-        }
+  <link rel="stylesheet" href="styles.css" />
 
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-        }
-
-        .header {
-            padding: 20px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            box-shadow: 0 4px 12px rgba(255, 106, 136, 0.4);
-        }
-
-        .app-title {
-            font-size: 22px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .pages-dropdown-wrapper {
-            position: relative;
-        }
-
-        .pages-selector {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .pages-selector:hover {
-            background: rgba(255, 255, 255, 0.25);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .pages-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            margin-top: 10px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            max-height: 400px;
-            overflow-y: auto;
-            min-width: 180px;
-            display: none;
-            z-index: 1000;
-            animation: slideDown 0.3s ease;
-        }
-
-        .pages-dropdown.active {
-            display: block;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .page-thumbnail {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .page-thumbnail:hover {
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-            border-left: 3px solid #667eea;
-            padding-left: 13px;
-        }
-
-        .page-thumb-icon {
-            width: 32px;
-            height: 40px;
-            background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: bold;
-            color: #667eea;
-            flex-shrink: 0;
-        }
-
-        .page-thumb-text {
-            flex: 1;
-            font-size: 13px;
-            color: #333;
-        }
-
-        .toolbar {
-            padding: 20px 30px;
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .btn {
-            padding: 10px 16px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: white;
-            color: #333;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: transparent;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn.primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-        }
-
-        .btn.primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-        }
-
-        .page-info {
-            font-size: 13px;
-            color: #666;
-            padding: 0 10px;
-            min-width: 100px;
-            text-align: center;
-        }
-
-        .viewer-area {
-            flex: 1;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .viewer-content {
-            width: 90%;
-            height: 90%;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            font-size: 16px;
-        }
-
-        .status-bar {
-            padding: 12px 30px;
-            background: white;
-            border-top: 1px solid #e0e0e0;
-            font-size: 12px;
-            color: #666;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                padding: 15px 20px;
-                flex-wrap: wrap;
-                gap: 15px;
-            }
-
-            .toolbar {
-                padding: 15px 20px;
-            }
-
-            .btn {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-
-            .page-info {
-                min-width: 80px;
-            }
-        }
-    </style>
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 </head>
 <body>
-    <div class="app-container">
-        <div class="header">
-            <div class="header-left">
-                <div class="logo-icon">📄</div>
-                <div class="app-title">Эмил PDF</div>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-section left">
+        <div class="logo">
+          <div class="logo-fill" id="logoFill"></div>
+          <div class="logo-content">
+            <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="9" y1="13" x2="15" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="9" y1="17" x2="15" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <div class="logo-text-wrapper">
+              <span class="logo-text">Эмиль</span>
+              <span class="logo-subtext">PDF</span>
             </div>
-            <div class="pages-dropdown-wrapper">
-                <button class="pages-selector" id="pagesBtn">
-                    <span>📄 Страницы</span>
-                    <span>▼</span>
-                </button>
-                <div class="pages-dropdown" id="pagesDropdown">
-                    <div class="page-thumbnail">
-                        <div class="page-thumb-icon">1</div>
-                        <div class="page-thumb-text">Титульная страница</div>
-                    </div>
-                    <div class="page-thumbnail">
-                        <div class="page-thumb-icon">2</div>
-                        <div class="page-thumb-text">Содержание</div>
-                    </div>
-                    <div class="page-thumbnail">
-                        <div class="page-thumb-icon">3</div>
-                        <div class="page-thumb-text">Введение</div>
-                    </div>
-                    <div class="page-thumbnail">
-                        <div class="page-thumb-icon">4</div>
-                        <div class="page-thumb-text">Основная часть</div>
-                    </div>
-                    <div class="page-thumbnail">
-                        <div class="page-thumb-icon">5</div>
-                        <div class="page-thumb-text">Заключение</div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
+      </div>
 
-        <div class="toolbar">
-            <button class="btn">◄ Предыдущая</button>
-            <div class="page-info" id="pageInfo">Стр. 1 из 5</div>
-            <button class="btn">Следующая ►</button>
-            <button class="btn">🔍 Увеличить</button>
-            <button class="btn">🔍 Уменьшить</button>
-            <button class="btn">⊟ Разделить</button>
-            <button class="btn">↩ Ответить</button>
-            <button class="btn">🖨 Печать</button>
-            <button class="btn">↗ Отправить</button>
-        </div>
+      <div class="topbar-section center">
+        <label class="btn-main">
+          📂 Загрузить PDF
+          <input type="file" id="fileInput" accept="application/pdf" hidden />
+        </label>
 
-        <div class="viewer-area">
-            <div class="viewer-content">
-                Загрузите PDF файл для просмотра
-            </div>
-        </div>
+        <button id="cropBtn" class="btn-main" disabled>💾 Сохранить область</button>
+        <button id="printAreaBtn" class="btn-main" disabled>🖨️ Печать области</button>
+        <button id="extractPagesBtn" class="btn-main" disabled>📄 Вырезать страницы</button>
+        <button id="posterBtn" class="btn-main" disabled>📐 Печать больших форматов</button>
+      </div>
 
-        <div class="status-bar">
-            <span>PDF Редактор v1.0</span>
-            <span id="status">Готово</span>
-        </div>
+      <div class="topbar-section right">
+        <button id="prevPage" class="btn nav-btn" disabled>⬅</button>
+        <span id="pageInfo" class="page-info">0 / 0</span>
+        <button id="nextPage" class="btn nav-btn" disabled>➡</button>
+
+        <div class="divider"></div>
+
+        <button id="zoomOut" class="btn" disabled>➖</button>
+        <button id="zoomIn" class="btn" disabled>➕</button>
+
+        <div class="divider"></div>
+
+        <button id="clearSelectionBtn" class="btn" disabled>🗑️ Сброс</button>
+      </div>
+    </header>
+
+    <!-- Полоса навигации миниатюр -->
+    <div class="page-nav-strip" id="pageNavStrip">
+      <div class="page-nav-track" id="pageNavTrack"></div>
     </div>
 
-    <script>
-        const pagesBtn = document.getElementById('pagesBtn');
-        const pagesDropdown = document.getElementById('pagesDropdown');
-        const pageThumbnails = document.querySelectorAll('.page-thumbnail');
+    <main class="main">
+      <!-- Пустое состояние -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">📄</div>
+        <h2>Загрузите PDF документ</h2>
+        <p>Перетащите файл сюда или нажмите кнопку ниже</p>
+        <label class="btn-upload">
+          📂 Выбрать файл
+          <input type="file" id="fileInputEmpty" accept="application/pdf" hidden />
+        </label>
+      </div>
 
-        // Открытие/закрытие меню страниц
-        pagesBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            pagesDropdown.classList.toggle('active');
-        });
+      <div class="canvas-container" id="canvasContainer" style="display: none;">
+        <div class="canvas-wrapper" id="canvasWrapper">
+          <canvas id="pdfCanvas"></canvas>
 
-        // Закрытие меню при клике вне
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.pages-dropdown-wrapper')) {
-                pagesDropdown.classList.remove('active');
-            }
-        });
+          <div class="selection-overlay" id="selectionOverlay">
+            <div class="selection-rect" id="selectionRect">
+              <div class="handle tl" data-handle="tl"></div>
+              <div class="handle tr" data-handle="tr"></div>
+              <div class="handle bl" data-handle="bl"></div>
+              <div class="handle br" data-handle="br"></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        // Обработка выбора страницы
-        pageThumbnails.forEach((thumb, index) => {
-            thumb.addEventListener('click', function() {
-                const pageNum = index + 1;
-                document.getElementById('pageInfo').textContent = `Стр. ${pageNum} из 5`;
-                pagesDropdown.classList.remove('active');
-                document.getElementById('status').textContent = `Страница ${pageNum} загружена`;
-            });
-        });
-    </script>
+      <!-- Minimap -->
+      <div class="minimap" id="minimap">
+        <canvas id="minimapCanvas"></canvas>
+        <div class="minimap-viewport" id="minimapViewport"></div>
+      </div>
+    </main>
+
+    <!-- Модал выбора страниц -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Выберите страницы для сохранения</h2>
+          <button class="modal-close" id="modalClose">✕</button>
+        </div>
+
+        <div class="modal-toolbar">
+          <button id="selectAllBtn" class="btn-small">✓ Выбрать всё</button>
+          <button id="deselectAllBtn" class="btn-small">✗ Убрать выбор</button>
+          <span id="selectedCount" class="selected-count">Выбрано: 0</span>
+        </div>
+
+        <div class="modal-grid" id="modalGrid"></div>
+
+        <div class="modal-footer">
+          <button id="cancelBtn" class="btn">Отмена</button>
+          <button id="saveExtractBtn" class="btn primary">💾 Сохранить PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модал больших форматов -->
+    <div class="modal-overlay" id="posterModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Печать больших форматов</h2>
+          <button class="modal-close" id="posterModalClose">✕</button>
+        </div>
+
+        <div class="poster-controls">
+          <div class="poster-info-box">
+            <span id="posterSourceInfo">📄 Будет напечатана вся страница</span>
+          </div>
+
+          <div class="poster-control-group">
+            <label>Размер листа:</label>
+            <select id="posterPaperSize" class="poster-select">
+              <option value="a4">A4 (210×297 мм)</option>
+              <option value="a3">A3 (297×420 мм)</option>
+              <option value="letter">Letter (216×279 мм)</option>
+            </select>
+          </div>
+
+          <div class="poster-control-group">
+            <label>Ориентация:</label>
+            <select id="posterOrientation" class="poster-select">
+              <option value="portrait">Портретная</option>
+              <option value="landscape">Альбомная</option>
+            </select>
+          </div>
+
+          <div class="poster-control-group">
+            <label>Масштаб: <span id="posterFormatLabel" class="poster-format-label"></span></label>
+            <div class="poster-scale-container">
+              <div class="poster-scale-marks-top">
+                <span class="poster-mark" data-scale="100">A4</span>
+                <span class="poster-mark" data-scale="141">A3</span>
+                <span class="poster-mark" data-scale="200">A2</span>
+                <span class="poster-mark" data-scale="283">A1</span>
+                <span class="poster-mark" data-scale="400">A0</span>
+              </div>
+              <div class="poster-scale-group">
+                <input type="range" id="posterScale" min="100" max="400" value="200" step="10" class="poster-slider" />
+                <span id="posterScaleValue" class="poster-scale-value">200%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="poster-preview" id="posterPreview">
+            <div class="poster-info">
+              Потребуется листов: <strong id="posterSheetCount">4</strong>
+            </div>
+            <div class="poster-grid" id="posterGridPreview"></div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="posterCancelBtn" class="btn">Отмена</button>
+          <button id="posterPrintBtn" class="btn primary">🖨️ Печать</button>
+          <button id="posterGenerateBtn" class="btn primary">💾 Сохранить PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Оверлей загрузки -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-content">
+        <div class="loading-logo">
+          <svg class="loading-logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="9" y1="13" x2="15" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="9" y1="17" x2="15" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="loading-logo-text">
+            <span>Эмиль</span>
+            <span class="loading-logo-sub">PDF</span>
+          </div>
+        </div>
+        <div class="loading-bar">
+          <div class="loading-progress" id="loadingProgress"></div>
+        </div>
+        <div class="loading-text" id="loadingText">Загрузка...</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
