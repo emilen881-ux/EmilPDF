@@ -1,212 +1,483 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>Эмиль PDF</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Эмиль PDF</title>
+    <meta name="description"
+        content="Инструмент для измерения расстояний на PDF документах. Калибровка, рисование линий, подсчёт длины в мм/см/м." />
 
-  <link rel="stylesheet" href="styles.css" />
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <!-- PDF.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <link rel="stylesheet" href="styles.css?v=92" />
 </head>
+
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div class="topbar-section left">
-        <div class="logo">
-          <div class="logo-fill" id="logoFill"></div>
-          <div class="logo-content">
-            <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <line x1="9" y1="13" x2="15" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <line x1="9" y1="17" x2="15" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <div class="logo-text-wrapper">
-              <span class="logo-text">Эмиль</span>
-              <span class="logo-subtext">PDF</span>
+    <!-- Экран выбора проекта -->
+    <div class="projects-screen" id="projectsScreen">
+        <div class="projects-container">
+            <div class="projects-header">
+                <a href="#" class="app-brand">
+                    <svg viewBox="0 0 24 24" fill="none" class="app-logo-icon" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    <div>
+                        <div class="app-brand-text" style="font-size: 24px;">Эмиль PDF</div>
+                        <div class="logo-sub-text">Измеритель для строительства</div>
+                    </div>
+                </a>
             </div>
-          </div>
+
+            <div class="projects-content">
+                <h2 class="projects-title">Ваши проекты</h2>
+                <p class="projects-subtitle">Выберите проект или создайте новый. Все данные сохраняются локально.</p>
+
+                <div class="projects-grid" id="projectsGrid">
+                    <!-- Проекты будут добавлены через JS -->
+                </div>
+
+                <div class="add-project-card" id="addProjectCard">
+                    <div class="add-project-icon">➕</div>
+                    <div class="add-project-text">Добавить проект</div>
+                    <div class="add-project-hint">Загрузите PDF чертёж</div>
+                    <input type="file" id="newProjectFile" accept="application/pdf,.pdf" />
+                </div>
+            </div>
         </div>
-      </div>
-
-      <div class="topbar-section center">
-        <label class="btn-main">
-          📂 Загрузить PDF
-          <input type="file" id="fileInput" accept="application/pdf" hidden />
-        </label>
-
-        <button id="cropBtn" class="btn-main" disabled>💾 Сохранить область</button>
-        <button id="printAreaBtn" class="btn-main" disabled>🖨️ Печать области</button>
-        <button id="extractPagesBtn" class="btn-main" disabled>📄 Вырезать страницы</button>
-        <button id="posterBtn" class="btn-main" disabled>📐 Печать больших форматов</button>
-      </div>
-
-      <div class="topbar-section right">
-        <button id="prevPage" class="btn nav-btn" disabled>⬅</button>
-        <span id="pageInfo" class="page-info">0 / 0</span>
-        <button id="nextPage" class="btn nav-btn" disabled>➡</button>
-
-        <div class="divider"></div>
-
-        <button id="zoomOut" class="btn" disabled>➖</button>
-        <button id="zoomIn" class="btn" disabled>➕</button>
-
-        <div class="divider"></div>
-
-        <button id="clearSelectionBtn" class="btn" disabled>🗑️ Сброс</button>
-      </div>
-    </header>
-
-    <!-- Полоса навигации миниатюр -->
-    <div class="page-nav-strip" id="pageNavStrip">
-      <div class="page-nav-track" id="pageNavTrack"></div>
     </div>
 
-    <main class="main">
-      <!-- Пустое состояние -->
-      <div class="empty-state" id="emptyState">
-        <div class="empty-icon">📄</div>
-        <h2>Загрузите PDF документ</h2>
-        <p>Перетащите файл сюда или нажмите кнопку ниже</p>
-        <label class="btn-upload">
-          📂 Выбрать файл
-          <input type="file" id="fileInputEmpty" accept="application/pdf" hidden />
-        </label>
-      </div>
+    <!-- Основной интерфейс работы с PDF -->
+    <div class="app-screen" id="appScreen" style="display: none;">
+        <div class="topbar" id="topbar">
+            <button class="btn btn-back" id="backToProjects" title="К проектам">
+                <span class="back-icon">←</span>
+                <span class="project-name-top" id="currentProjectName">Название проекта</span>
+            </button>
 
-      <div class="canvas-container" id="canvasContainer" style="display: none;">
-        <div class="canvas-wrapper" id="canvasWrapper">
-          <canvas id="pdfCanvas"></canvas>
+            <button class="app-brand-mini" id="logoBtn"
+                style="cursor: default; background: transparent; border: none; padding-left: 0;">
+                <svg viewBox="0 0 24 24" fill="none" class="app-logo-icon" stroke="#fff" stroke-width="2.5"
+                    style="filter: drop-shadow(0 0 12px rgba(124, 92, 255, 1)); overflow: visible; width: 24px;">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round"
+                        stroke-linejoin="round" fill="rgba(124, 92, 255, 0.6)" />
+                </svg>
+                <div class="brand-text-col">
+                    <span class="app-brand-text"
+                        style="color: #fff; text-shadow: 0 0 15px rgba(124, 92, 255, 0.8);">Эмиль PDF</span>
+                </div>
+            </button>
 
-          <div class="selection-overlay" id="selectionOverlay">
-            <div class="selection-rect" id="selectionRect">
-              <div class="handle tl" data-handle="tl"></div>
-              <div class="handle tr" data-handle="tr"></div>
-              <div class="handle bl" data-handle="bl"></div>
-              <div class="handle br" data-handle="br"></div>
+            <div class="spacer"></div>
+
+            <div class="rightbar">
+                <div class="seg" title="Страницы">
+                    <button class="seg-btn" id="prevBtn" disabled aria-label="Предыдущая страница">‹</button>
+                    <div class="seg-mid" id="pageInfo" role="button" tabindex="0" aria-label="Выбор страницы">0 / 0
+                    </div>
+                    <button class="seg-btn" id="nextBtn" disabled aria-label="Следующая страница">›</button>
+                </div>
+
+                <button class="btn btn-icon-only btn-calibration btn-expandable" id="rulerToolBtn" aria-label="Рулетка">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="tape-measure-icon">
+                        <!-- Лента (выезжающая часть) -->
+                        <g class="tape-tongue">
+                            <!-- Основная линия ленты и крючок -->
+                            <path d="M10 17h11 M21 14v5" stroke-width="2"></path>
+                            <!-- Деления (засечки) -->
+                            <path d="M12 16v2 M15 16v2 M18 16v2" stroke-width="1.5" opacity="0.8"></path>
+                        </g>
+                        <!-- Корпус рулетки -->
+                        <path d="M1 17V7a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2z" fill="#0f1b33"
+                            stroke="currentColor" stroke-width="2"></path>
+                        <circle cx="8" cy="11" r="3.5" stroke="currentColor" stroke-width="1.5"></circle>
+                        <circle cx="8" cy="11" r="1" fill="currentColor"></circle>
+                    </svg>
+                    <span class="btn-label">Рулетка</span>
+                </button>
+
+                <button class="btn btn-icon-only btn-tool-text" id="textToolBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path class="text-top" d="M4 7V4h16v3"></path>
+                        <path class="text-bottom" d="M9 20h6"></path>
+                        <path class="text-cursor" d="M12 4v16"></path>
+                    </svg>
+                    <span class="btn-label-text">Надпись</span>
+                </button>
+
+                <button class="btn btn-icon-only btn-tool-select" id="selectBtn" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="scissors-icon">
+                        <!-- Верхнее лезвие -->
+                        <g class="blade-top" style="transform-origin: 9px 12px">
+                            <circle cx="6" cy="6" r="3"></circle>
+                            <line x1="8.5" y1="8.5" x2="18" y2="18"></line>
+                        </g>
+                        <!-- Нижнее лезвие -->
+                        <g class="blade-bottom" style="transform-origin: 9px 12px">
+                            <circle cx="6" cy="18" r="3"></circle>
+                            <line x1="8.5" y1="15.5" x2="18" y2="6"></line>
+                        </g>
+                    </svg>
+                    <span class="btn-label-text">Выделить</span>
+                </button>
+
+                <button class="btn btn-icon-only btn-extract" id="extractPagesBtn" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="extract-icon">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <g class="arrow-up">
+                            <line x1="12" y1="18" x2="12" y2="12"></line>
+                            <polyline points="9 15 12 12 15 15"></polyline>
+                        </g>
+                    </svg>
+                    <span class="btn-label-text">Извлечь</span>
+                </button>
+
+                <button class="btn btn-icon-only btn-primary btn-tiled" id="topbarPrintTiledBtn" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="printer-icon">
+                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                        <g class="paper-out">
+                            <rect x="6" y="14" width="12" height="8"></rect>
+                        </g>
+                    </svg>
+                    <span class="btn-label-text">Печать</span>
+                </button>
+
+                <div class="seg seg-zoom" title="Масштаб">
+                    <button class="seg-btn" id="zoomOut" aria-label="Уменьшить">−</button>
+                    <div class="zoom-mid" id="zoomLevel">100%</div>
+                    <button class="seg-btn" id="zoomIn" aria-label="Увеличить">+</button>
+                </div>
+
+                <div class="seg" title="История">
+                    <button class="seg-btn" id="undoBtn" disabled aria-label="Назад (Undo)">↶</button>
+                    <button class="seg-btn" id="redoBtn" disabled aria-label="Вперёд (Redo)">↷</button>
+                </div>
+
+                <div class="counter" id="counter">0 мм</div>
+
+                <button class="btn btn-icon-only btn-tool-calibrate" id="calibratePageBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="22" y1="12" x2="18" y2="12"></line>
+                        <line x1="6" y1="12" x2="2" y2="12"></line>
+                        <line x1="12" y1="6" x2="12" y2="2"></line>
+                        <line x1="12" y1="22" x2="12" y2="18"></line>
+                    </svg>
+                    <span class="btn-label-text">Калибровка</span>
+                </button>
+
+                <button class="btn btn-danger btn-icon-only" id="clearPageBtn" title="Стереть всё на странице">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    <span class="btn-label-text">Удалить</span>
+                </button>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Minimap -->
-      <div class="minimap" id="minimap">
-        <canvas id="minimapCanvas"></canvas>
-        <div class="minimap-viewport" id="minimapViewport"></div>
-      </div>
-    </main>
-
-    <!-- Модал выбора страниц -->
-    <div class="modal-overlay" id="modalOverlay">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>Выберите страницы для сохранения</h2>
-          <button class="modal-close" id="modalClose">✕</button>
         </div>
 
-        <div class="modal-toolbar">
-          <button id="selectAllBtn" class="btn-small">✓ Выбрать всё</button>
-          <button id="deselectAllBtn" class="btn-small">✗ Убрать выбор</button>
-          <span id="selectedCount" class="selected-count">Выбрано: 0</span>
+        <div class="thumbs-panel" id="thumbsPanel" aria-hidden="true">
+            <div class="thumbs-header">
+                <div class="thumbs-title">
+                    Страницы <span class="pill" id="thumbsCount">0</span>
+                </div>
+                <div class="thumbs-actions">
+                    <button class="thumbs-act" id="thumbsLeft" title="Прокрутить влево">‹</button>
+                    <button class="thumbs-act" id="thumbsRight" title="Прокрутить вправо">›</button>
+                    <button class="thumbs-act" id="thumbsClose" title="Закрыть">✕</button>
+                </div>
+            </div>
+            <div class="thumbs-strip" id="thumbnails"></div>
         </div>
 
-        <div class="modal-grid" id="modalGrid"></div>
-
-        <div class="modal-footer">
-          <button id="cancelBtn" class="btn">Отмена</button>
-          <button id="saveExtractBtn" class="btn primary">💾 Сохранить PDF</button>
+        <div class="main" id="main">
+            <div class="canvas-wrapper" id="canvasWrapper">
+                <div class="sheet" id="sheet">
+                    <canvas id="pdfCanvas"></canvas>
+                    <canvas id="rulerCanvas"></canvas>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <div class="floating-btn" id="floatingBtn"
+            title="Удерживай ⊕ чтобы рисовать. Чтобы передвинуть — удержи и потяни">
+            ⊕
+        </div>
+
+        <div class="hint-bar" id="hintBar">
+            <span class="kbd">Shift</span> рисуй • отпустил — готово • концы — таскай
+        </div>
     </div>
 
-    <!-- Модал больших форматов -->
-    <div class="modal-overlay" id="posterModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>Печать больших форматов</h2>
-          <button class="modal-close" id="posterModalClose">✕</button>
-        </div>
-
-        <div class="poster-controls">
-          <div class="poster-info-box">
-            <span id="posterSourceInfo">📄 Будет напечатана вся страница</span>
-          </div>
-
-          <div class="poster-control-group">
-            <label>Размер листа:</label>
-            <select id="posterPaperSize" class="poster-select">
-              <option value="a4">A4 (210×297 мм)</option>
-              <option value="a3">A3 (297×420 мм)</option>
-              <option value="letter">Letter (216×279 мм)</option>
-            </select>
-          </div>
-
-          <div class="poster-control-group">
-            <label>Ориентация:</label>
-            <select id="posterOrientation" class="poster-select">
-              <option value="portrait">Портретная</option>
-              <option value="landscape">Альбомная</option>
-            </select>
-          </div>
-
-          <div class="poster-control-group">
-            <label>Масштаб: <span id="posterFormatLabel" class="poster-format-label"></span></label>
-            <div class="poster-scale-container">
-              <div class="poster-scale-marks-top">
-                <span class="poster-mark" data-scale="100">A4</span>
-                <span class="poster-mark" data-scale="141">A3</span>
-                <span class="poster-mark" data-scale="200">A2</span>
-                <span class="poster-mark" data-scale="283">A1</span>
-                <span class="poster-mark" data-scale="400">A0</span>
-              </div>
-              <div class="poster-scale-group">
-                <input type="range" id="posterScale" min="100" max="400" value="200" step="10" class="poster-slider" />
-                <span id="posterScaleValue" class="poster-scale-value">200%</span>
-              </div>
+    <div class="loading" id="loading" aria-hidden="true">
+        <div class="loading-card">
+            <div class="loading-title">
+                <strong id="loadingText">Загрузка…</strong>
+                <div class="brand">Эмиль PDF</div>
             </div>
-          </div>
-
-          <div class="poster-preview" id="posterPreview">
-            <div class="poster-info">
-              Потребуется листов: <strong id="posterSheetCount">4</strong>
-            </div>
-            <div class="poster-grid" id="posterGridPreview"></div>
-          </div>
+            <div class="loading-sub" id="loadingSub">Готовим страницу</div>
+            <div class="bar"><i></i></div>
         </div>
-
-        <div class="modal-footer">
-          <button id="posterCancelBtn" class="btn">Отмена</button>
-          <button id="posterPrintBtn" class="btn primary">🖨️ Печать</button>
-          <button id="posterGenerateBtn" class="btn primary">💾 Сохранить PDF</button>
-        </div>
-      </div>
     </div>
 
-    <!-- Оверлей загрузки -->
-    <div class="loading-overlay" id="loadingOverlay">
-      <div class="loading-content">
-        <div class="loading-logo">
-          <svg class="loading-logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <line x1="9" y1="13" x2="15" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <line x1="9" y1="17" x2="15" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <div class="loading-logo-text">
-            <span>Эмиль</span>
-            <span class="loading-logo-sub">PDF</span>
-          </div>
-        </div>
-        <div class="loading-bar">
-          <div class="loading-progress" id="loadingProgress"></div>
-        </div>
-        <div class="loading-text" id="loadingText">Загрузка...</div>
-      </div>
-    </div>
-  </div>
+    <div class="calib-hint" id="calibHint">👆 Поставьте вторую точку</div>
 
-  <script src="app.js"></script>
+    <div class="modal" id="calibModal" aria-hidden="true">
+        <div class="modal-content">
+            <h3>📏 Введите длину линии</h3>
+            <input type="number" id="calibLength" value="100" min="1" inputmode="numeric" placeholder="Длина в мм" />
+            <div class="modal-btns">
+                <button class="btn" id="calibCancel">Отмена</button>
+                <button class="btn btn-primary" id="calibOk">✓ OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="projectNameModal" aria-hidden="true">
+        <div class="modal-content">
+            <h3>📁 Название проекта</h3>
+            <input type="text" id="projectNameInput" placeholder="Например: ЖК Солнечный" />
+            <div class="modal-btns">
+                <button class="btn" id="projectNameCancel">Отмена</button>
+                <button class="btn btn-primary" id="projectNameOk">✓ Создать</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="deleteModal" aria-hidden="true">
+        <div class="modal-content">
+            <h3 id="deleteModalTitle">🗑️ Удалить проект?</h3>
+            <p class="modal-text" id="deleteModalText">Все данные проекта будут удалены безвозвратно.</p>
+            <div class="modal-btns">
+                <button class="btn" id="deleteCancel">Отмена</button>
+                <button class="btn btn-danger" id="deleteOk">🗑️ Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="selection-panel" id="selectionPanel">
+        <div class="selection-header">
+            <span class="selection-title">Фрагмент</span>
+            <button class="selection-close" id="selectionClose">✕</button>
+        </div>
+        <div class="selection-preview">
+            <img id="selectionImg" />
+        </div>
+        <div class="selection-actions">
+            <button class="btn btn-primary" id="saveSelectPdfBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>PDF</span>
+            </button>
+            <button class="btn btn-extract" id="printTiledBtn" title="Печать мозаикой (A4)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                    <line x1="3" y1="15" x2="21" y2="15"></line>
+                    <line x1="9" y1="3" x2="9" y2="21"></line>
+                    <line x1="15" y1="3" x2="15" y2="21"></line>
+                </svg>
+                <span>Печать</span>
+            </button>
+
+        </div>
+    </div>
+
+    <!-- ТИРАЖИРОВАНИЕ / ПЕЧАТЬ МОЗАИКОЙ -->
+    <div id="printTiledModal" class="modal" style="display: none;">
+        <div class="modal-backdrop" onclick="closeModal($('printTiledModal'))"></div>
+        <div class="modal-content print-tiled-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Печать сеткой</h2>
+                <button class="btn-close" onclick="closeModal($('printTiledModal'))">&times;</button>
+            </div>
+
+            <div class="print-tiled-body">
+                <div class="print-tiled-preview-container">
+                    <div id="tiledPreviewWrapper" class="tiled-preview-wrapper">
+                        <canvas id="tiledPreviewCanvas"></canvas>
+                        <div id="tiledGridOverlay" class="tiled-grid-overlay"></div>
+                    </div>
+                </div>
+
+                <div class="print-tiled-controls">
+                    <div class="control-group">
+                        <label>Целевой формат:</label>
+                        <div class="format-chips">
+                            <button class="chip active" data-format="A4">A4</button>
+                            <button class="chip" data-format="A3">A3</button>
+                            <button class="chip" data-format="A2">A2</button>
+                            <button class="chip" data-format="A1">A1</button>
+                            <button class="chip" data-format="A0">A0</button>
+                        </div>
+                        <div style="margin-top: 10px; display: flex; gap: 10px;">
+                            <button class="btn btn-sm active" id="tiledOrientPortrait">Портретная ▯</button>
+                            <button class="btn btn-sm" id="tiledOrientLandscape">Альбомная ▭</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Масштаб и поворот:</label>
+                        <div class="modal-btns" style="margin-top: 8px; gap: 8px;">
+                            <button class="btn btn-sm" id="tiledRotateBtn" title="Повернуть на 90°">↩ Повернуть</button>
+                            <button class="btn btn-sm" id="tiledResetBtn" title="Сбросить">⟲ Сброс</button>
+                        </div>
+                        <div class="zoom-range-container"
+                            style="margin-top: 12px; display: flex; align-items: center; gap: 10px;">
+                            <button id="tiledZoomOutBtn" class="btn-icon-tiny" title="Уменьшить">−</button>
+                            <input type="range" id="tiledZoomSlider" min="0.1" max="3" step="0.05" value="1"
+                                style="flex: 1; accent-color: #7c5cff;">
+                            <button id="tiledZoomInBtn" class="btn-icon-tiny" title="Увеличить">+</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group info-stats">
+                        <div class="stat">Листов A4: <span id="tiledSheetCount">0</span></div>
+                        <div class="stat">Размер: <span id="tiledFinalSize">?</span></div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="tiledHintsToggle" checked>
+                            <span class="checkmark"></span>
+                            Добавить подсказки и нахлест (5мм)
+                        </label>
+                    </div>
+
+                    <div class="modal-btns">
+                        <button class="btn btn-secondary" id="tiledPrintDirectBtn" title="Сразу на печать">🖨️
+                            Печать</button>
+                        <button class="btn" onclick="closeModal($('printTiledModal'))">Отмена</button>
+                        <button class="btn btn-primary" id="tiledGenerateBtn">💾 Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <!-- EXTRACT PAGES MODAL -->
+    <div class="modal-overlay" id="extractModal" aria-hidden="true" style="display: none;">
+        <div class="modal-backdrop" onclick="closeModal($('extractModal'))"></div>
+        <div class="modal-container extract-modal-container">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title">Извлечение страниц</h2>
+                    <div class="selected-pages-info" id="extractSelectedInfo">Выбрано: 0</div>
+                </div>
+                <div class="extract-size-control">
+                    <span class="size-icon small">🔍</span>
+                    <input type="range" id="extractSizeSlider" min="80" max="220" value="140" class="size-slider">
+                    <span class="size-icon large">🔍</span>
+                </div>
+            </div>
+            <div class="extract-grid-wrapper">
+                <div class="extract-grid" id="extractGrid">
+                    <!-- Thumbnails will be generated here -->
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="extractCancel">Отмена</button>
+                <button class="btn btn-secondary" id="extractPrintBtn" disabled>🖨️ Печать</button>
+                <button class="btn btn-primary" id="extractSaveBtn" disabled>Сохранить PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview popup for long-press (OUTSIDE modal for proper z-index) -->
+    <div id="extractPreview" class="extract-preview">
+        <div class="extract-preview-content">
+            <img id="extractPreviewImg" src="" alt="Preview">
+            <div class="extract-preview-page" id="extractPreviewPage"></div>
+        </div>
+    </div>
+
+    <!-- TEXT MODAL -->
+    <div id="textModal" class="modal" style="display: none;">
+        <div class="modal-backdrop" onclick="closeModal($('textModal'))"></div>
+        <div class="modal-content" style="max-width: 380px;">
+            <div class="modal-header"
+                style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;">
+                <h3 class="modal-title" style="margin: 0; font-size: 18px; color: #fff;">Текст / Заметка</h3>
+                <button class="btn-close" onclick="closeModal($('textModal'))"
+                    style="background: none; border: none; font-size: 24px; color: rgba(255,255,255,0.5); cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <textarea id="textInputContent" class="text-input-area" rows="3" placeholder="Введите текст..."
+                    style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff; font-size: 15px; resize: none; outline: none; font-family: inherit;"
+                    onfocus="this.style.borderColor='rgba(124, 92, 255, 0.6)'; this.style.background='rgba(0,0,0,0.3)'"
+                    onblur="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(0,0,0,0.2)'"></textarea>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+                <!-- Фон -->
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.7);">Фон плашки</span>
+                    <div class="color-opts" id="textBgOpts" style="display: flex; gap: 10px;">
+                        <button class="color-btn active" data-color="transparent" title="Прозрачный"
+                            style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background: conic-gradient(#555 25%, #333 0 50%, #555 0 75%, #333 0); color: #ccc; display: flex; align-items: center; justify-content: center; font-size: 10px;">✕</button>
+                        <button class="color-btn" data-color="#ffffff"
+                            style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background:#fff;"
+                            title="Белый"></button>
+                        <button class="color-btn" data-color="#fef3c7"
+                            style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background:#fef3c7;"
+                            title="Желтый"></button>
+                        <button class="color-btn" data-color="#000000"
+                            style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.4); background:#000;"
+                            title="Черный"></button>
+                    </div>
+                </div>
+
+                <!-- Текст -->
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.7);">Цвет текста</span>
+                    <div class="color-opts" id="textColorOpts" style="display: flex; gap: 10px;">
+                        <button class="color-btn active" data-color="#000000"
+                            style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.4); background:#000;"
+                            title="Черный"></button>
+                        <button class="color-btn" data-color="#ef4444"
+                            style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background:#ef4444;"
+                            title="Красный"></button>
+                        <button class="color-btn" data-color="#3b82f6"
+                            style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background:#3b82f6;"
+                            title="Синий"></button>
+                        <button class="color-btn" data-color="#ffffff"
+                            style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background:#fff;"
+                            title="Белый"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-btns"
+                style="margin-top: 0; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); justify-content: flex-end;">
+                <button class="btn"
+                    style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8);"
+                    onclick="closeModal($('textModal'))">Отмена</button>
+                <button class="btn btn-primary" id="textPlaceActionBtn">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=89"></script>
 </body>
+
 </html>
