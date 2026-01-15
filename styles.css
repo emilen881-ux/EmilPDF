@@ -323,12 +323,23 @@ body {
 .app-brand-mini {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 20px;
-  padding-left: 20px;
-  border-left: 1px solid rgba(255, 255, 255, .1);
-  opacity: 0.7;
+  gap: 10px;
+  margin-left: 8px;
+  padding: 0 14px;
+  height: var(--btnH);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--btnR);
   user-select: none;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: all 0.2s ease;
+}
+
+.app-brand-mini:hover {
+  opacity: 1;
+  background: rgba(124, 92, 255, 0.08);
+  border-color: rgba(124, 92, 255, 0.2);
 }
 
 .brand-icon {
@@ -498,8 +509,9 @@ body {
 .rightbar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
+  height: var(--btnH);
 }
 
 /* Кнопки */
@@ -640,13 +652,12 @@ body {
 
 
 
-/* === TOOL BUTTONS (Matching .seg design) === */
+/* === TOOL BUTTONS (Unified Design) === */
 
 .btn-icon-only {
-  min-width: 54px;
-  /* Wider default - not square */
+  min-width: var(--btnH);
   height: var(--btnH);
-  padding: 0 16px;
+  padding: 0 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -654,26 +665,27 @@ body {
   position: relative;
   overflow: hidden;
   border-radius: var(--btnR);
-  background: rgba(255, 255, 255, .06);
-  border: 1px solid rgba(255, 255, 255, .10);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, .12);
-  color: var(--text);
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+  color: #fff;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.3s ease;
 }
 
 .btn-icon-only svg {
-  width: 26px;
-  /* Bigger icons */
-  height: 26px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
+  stroke: #fff;
+  color: #fff;
 }
 
 /* Label hidden by default */
 .btn-icon-only .btn-label-text {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
   white-space: nowrap;
   max-width: 0;
   overflow: hidden;
@@ -684,13 +696,11 @@ body {
 
 /* === HOVER: Expand horizontally === */
 .btn-icon-only:hover:not(:disabled) {
-  background: rgba(255, 255, 255, .10);
-  border-color: rgba(255, 255, 255, .15);
+  padding: 0 16px;
 }
 
 .btn-icon-only:hover:not(:disabled) .btn-label-text {
-  max-width: 80px;
-  /* Less expansion */
+  max-width: 100px;
   opacity: 1;
   margin-left: 8px;
 }
@@ -703,101 +713,118 @@ body {
 
 /* === Subtle color accents on hover === */
 /* === PERMANENT DISTINCT COLORS FOR TOOLS === */
-/* All buttons have a base visible color to distinguish them */
+/* All buttons have a solid colored background with white icons */
 
 /* Ruler: Amber/Orange */
 /* Ruler: Colors controlled by .uncalibrated/.calibrated state classes */
 .btn-calibration {
-  /* Base properties */
+  /* Base properties - controlled by state classes below */
 }
 
-/* Text: Cyan/Blue */
-/* Text: Cyan/Blue - Subtle */
+/* Text: Cyan/Teal */
 .btn-tool-text {
-  border-color: rgba(6, 182, 212, 0.25);
-  background: rgba(6, 182, 212, 0.04);
-  color: rgba(103, 232, 249, 0.9);
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(6, 182, 212, 0.15));
+  border-color: rgba(6, 182, 212, 0.5);
+}
+
+.btn-tool-text svg {
+  stroke: #fff !important;
+  color: #fff !important;
 }
 
 .btn-tool-text:hover:not(:disabled) {
-  border-color: rgba(6, 182, 212, 0.5);
-  background: rgba(6, 182, 212, 0.12);
-  color: #fff;
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.5), rgba(6, 182, 212, 0.3));
+  border-color: rgba(6, 182, 212, 0.7);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
 }
 
-/* Select/Scissors: Pink/Rose - Subtle */
+/* Select/Scissors: Rose/Pink */
 .btn-tool-select {
-  border-color: rgba(244, 63, 94, 0.25);
-  background: rgba(244, 63, 94, 0.04);
-  color: rgba(253, 164, 175, 0.9);
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.3), rgba(244, 63, 94, 0.15));
+  border-color: rgba(244, 63, 94, 0.5);
+}
+
+.btn-tool-select svg {
+  stroke: #fff !important;
+  color: #fff !important;
 }
 
 .btn-tool-select:hover:not(:disabled) {
-  border-color: rgba(244, 63, 94, 0.5);
-  background: rgba(244, 63, 94, 0.12);
-  color: #fff;
-  box-shadow: 0 0 15px rgba(244, 63, 94, 0.15);
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.5), rgba(244, 63, 94, 0.3));
+  border-color: rgba(244, 63, 94, 0.7);
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.3);
 }
 
-/* Extract: Violet - Subtle */
+/* Extract: Violet/Purple */
 .btn-extract {
-  border-color: rgba(139, 92, 246, 0.25);
-  background: rgba(139, 92, 246, 0.04);
-  color: rgba(216, 180, 254, 0.9);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(139, 92, 246, 0.15));
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.btn-extract svg {
+  stroke: #fff !important;
+  color: #fff !important;
 }
 
 .btn-extract:hover:not(:disabled) {
-  border-color: rgba(139, 92, 246, 0.5);
-  background: rgba(139, 92, 246, 0.12);
-  color: #fff;
-  box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(139, 92, 246, 0.3));
+  border-color: rgba(139, 92, 246, 0.7);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
 }
 
-/* Print (Tiled): Emerald/Green - Distinct from others */
+/* Print (Tiled): Emerald/Green */
 .btn-primary.btn-tiled {
-  border-color: rgba(16, 185, 129, 0.25);
-  background: rgba(16, 185, 129, 0.04);
-  color: rgba(110, 231, 183, 0.9);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.15));
+  border-color: rgba(16, 185, 129, 0.5);
   box-shadow: none;
   background-image: none;
 }
 
+.btn-primary.btn-tiled svg {
+  stroke: #fff !important;
+  color: #fff !important;
+}
+
 .btn-primary.btn-tiled:hover:not(:disabled) {
-  border-color: rgba(16, 185, 129, 0.5);
-  background: rgba(16, 185, 129, 0.12);
-  color: #fff;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(16, 185, 129, 0.3));
+  border-color: rgba(16, 185, 129, 0.7);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
 }
 
 /* === CALIBRATION STATUS COLORS === */
 
-/* Uncalibrated: Amber - Subtle */
+/* Uncalibrated: Amber */
 .btn-calibration.uncalibrated {
-  border-color: rgba(245, 158, 11, 0.25);
-  background: rgba(245, 158, 11, 0.04);
-  color: rgba(252, 211, 77, 0.9);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(245, 158, 11, 0.15));
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+.btn-calibration.uncalibrated svg {
+  stroke: #fff !important;
+  color: #fff !important;
 }
 
 .btn-calibration.uncalibrated:hover:not(:disabled) {
-  border-color: rgba(245, 158, 11, 0.6);
-  background: rgba(245, 158, 11, 0.15);
-  color: #fff;
-  box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.5), rgba(245, 158, 11, 0.3));
+  border-color: rgba(245, 158, 11, 0.7);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
 }
 
-/* Calibrated: Green - Subtle */
+/* Calibrated: Green */
 .btn-calibration.calibrated {
-  border-color: rgba(16, 185, 129, 0.25);
-  background: rgba(16, 185, 129, 0.04);
-  color: rgba(110, 231, 183, 0.9);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.15));
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.btn-calibration.calibrated svg {
+  stroke: #fff !important;
+  color: #fff !important;
 }
 
 .btn-calibration.calibrated:hover:not(:disabled) {
-  border-color: rgba(16, 185, 129, 0.6);
-  background: rgba(16, 185, 129, 0.15);
-  color: #fff;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(16, 185, 129, 0.3));
+  border-color: rgba(16, 185, 129, 0.7);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
 }
 
 /* Tape Measure: Tongue pulses in/out */
@@ -810,9 +837,8 @@ body {
 /* Ruler Icon specific */
 .tape-measure-icon {
   overflow: visible;
-  /* Allow tongue to extend outside viewBox */
-  margin-right: 8px;
-  /* Extra space for animation so it doesn't hit text */
+  width: 22px !important;
+  height: 22px !important;
 }
 
 .tape-tongue {
@@ -2963,21 +2989,22 @@ body {
 }
 
 /* Текст скрыт по умолчанию */
-.btn-expandable .btn-label {
+.btn-expandable .btn-label,
+.btn-expandable .btn-label-text {
   max-width: 0 !important;
   opacity: 0 !important;
   overflow: hidden !important;
   margin-left: 0 !important;
   white-space: nowrap !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #fff !important;
   transition: max-width 0.35s ease, opacity 0.25s ease, margin-left 0.35s ease !important;
 }
 
 /* При наведении — текст появляется */
-.btn-expandable:hover .btn-label {
+.btn-expandable:hover .btn-label,
+.btn-expandable:hover .btn-label-text {
   max-width: 100px !important;
   opacity: 1 !important;
   margin-left: 10px !important;
